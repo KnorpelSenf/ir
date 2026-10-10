@@ -40,6 +40,72 @@ describe("MIR: pointers", () => {
   it.skip("must support pointers as phi operands", () => {
     // TODO
   });
+
+  it("must accept define-and-drop of a borrow in only one branch", () => {
+    // This unit test is specifically intended for static analysis. It is an
+    // example of a valid program which a borrow-checker might detect as a 
+    // false positive. The state of %2, which is a borrow, is 'Undefined' in one
+    // branch and 'Destroyed' in another. In both cases there is no cleanup 
+    // obligation left over. If the state is treated as 'Ambiguous' in the final
+    // block where the return tries to clean it up, this may result in a 'Use'
+    // of %1, which was dropped in both branches, and would trigger an error.
+    // The desired behavior is that the static analysis allows this example to
+    // pass.
+    const text: string = `
+(program
+  (function
+    (parameters)
+    (locals Int Int (Borrowed Int))
+    (result Int)
+    (block
+      (let %0 (identity (constant 1)))
+      (let %1 (identity (constant 42)))
+      (branch (peek %0) ^1 ^2))
+    (block
+      (drop %1)
+      (jump ^3))
+    (block
+      (let %2 (borrow (peek %1)))
+      (drop %2)
+      (drop %1)
+      (jump ^3))
+    (block
+      (return %0))))
+`;
+
+    const input: MIR.Program = ["program", [
+      "function",
+      ["parameters"],
+      ["locals", ["Int"], ["Int"], ["Borrowed", ["Int"]]],
+      ["result", ["Int"]],
+      [
+        "block",
+        ["let", "%0", ["identity", ["constant", 1]]],
+        ["let", "%1", ["identity", ["constant", 42]]],
+        ["branch", ["peek", "%0"], "^1", "^2"],
+      ],
+      [
+        "block",
+        ["drop", "%1"],
+        ["jump", "^3"],
+      ],
+      [
+        "block",
+        ["let", "%2", ["borrow", ["peek", "%1"]]],
+        ["drop", "%2"],
+        ["drop", "%1"],
+        ["jump", "^3"],
+      ],
+      [
+        "block",
+        ["return", "%0"],
+      ],
+    ]];
+
+    expect(input).toBeDefined();
+    expect(print(input)).toEqual(text);
+    expect(evaluate(lower(input))).toBe(1);
+  });
 });
 
 describe.skip("MIR: use-after-free", () => {
