@@ -47,7 +47,7 @@ export type GreaterEqual = [ tag: "greater_equal", Operand, Operand ];
 
 export type Peek         = [ tag: "peek",          ResourceId ]; // access a Resource
 export type Move         = [ tag: "move",          ResourceId ]; // access and destroy a Resource
-export type Constant     = [ tag: "constant",       value: number ];
+export type Constant     = [ tag: "constant",      value: number ];
 export type Arguments    = [ tag: "arguments",     ...Operand[]];
 export type Sources      = [ tag: "sources",       ...From[] ];
 export type From         = [ tag: "from",          block: BlockId, resource: Operand ];
