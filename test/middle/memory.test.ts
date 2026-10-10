@@ -5,7 +5,7 @@ import { print } from "../../src/middle/print.gen.ts";
 import { lower } from "../../src/middle_to_low/lower.gen.ts";
 import { evaluate } from "../../src/low/machine.ts";
 
-describe("MIR: memory and ownership", () => {
+describe("MIR: pointers", () => {
   it("must create and load a pointer", () => {
     const text: string = `
 (program
@@ -38,70 +38,6 @@ describe("MIR: memory and ownership", () => {
   });
 
   it.skip("must support pointers as phi operands", () => {
-    // TODO
-  });
-
-  it("must allow consuming the Copy operand", () => {
-    const text: string = `
-(program
-  (function
-    (parameters)
-    (locals Int Int)
-    (result Int)
-    (block
-      (let %0 (identity (constant 11)))
-      (let %1 (identity (move %0)))
-      (return %1))))
-`;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
-      [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["identity", ["move", "%0"]]],
-        ["return", "%1"],
-      ],
-    ]];
-    expect(input).toBeDefined();
-    expect(print(input)).toEqual(text);
-    expect(evaluate(lower(input))).toBe(11);
-  });
-
-  it("must allow consuming an Add operand", () => {
-    const text: string = `
-(program
-  (function
-    (parameters)
-    (locals Int Int Int)
-    (result Int)
-    (block
-      (let %0 (identity (constant 11)))
-      (let %1 (identity (constant 13)))
-      (let %2 (add (move %0) (peek %1)))
-      (return %2))))
-`;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
-      [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["let", "%2", ["add", ["move", "%0"], ["peek", "%1"]]],
-        ["return", "%2"],
-      ],
-    ]];
-    expect(input).toBeDefined();
-    expect(print(input)).toEqual(text);
-    expect(evaluate(lower(input))).toBe(11 + 13);
-  });
-
-  it.skip("must allow consuming a phi operand", () => {
     // TODO
   });
 });

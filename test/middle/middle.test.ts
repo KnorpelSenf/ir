@@ -144,6 +144,73 @@ describe("MIR: copying of registers", () => {
   });
 });
 
+
+describe("MIR: moving of registers", () => {
+  it("must allow consuming the Copy operand", () => {
+    const text: string = `
+(program
+  (function
+    (parameters)
+    (locals Int Int)
+    (result Int)
+    (block
+      (let %0 (identity (constant 11)))
+      (let %1 (identity (move %0)))
+      (return %1))))
+`;
+    const input: MIR.Program = ["program", [
+      "function",
+      ["parameters"],
+      ["locals", ["Int"], ["Int"]],
+      ["result", ["Int"]],
+      [
+        "block",
+        ["let", "%0", ["identity", ["constant", 11]]],
+        ["let", "%1", ["identity", ["move", "%0"]]],
+        ["return", "%1"],
+      ],
+    ]];
+    expect(input).toBeDefined();
+    expect(print(input)).toEqual(text);
+    expect(evaluate(lower(input))).toBe(11);
+  });
+
+  it("must allow consuming an Add operand", () => {
+    const text: string = `
+(program
+  (function
+    (parameters)
+    (locals Int Int Int)
+    (result Int)
+    (block
+      (let %0 (identity (constant 11)))
+      (let %1 (identity (constant 13)))
+      (let %2 (add (move %0) (peek %1)))
+      (return %2))))
+`;
+    const input: MIR.Program = ["program", [
+      "function",
+      ["parameters"],
+      ["locals", ["Int"], ["Int"], ["Int"]],
+      ["result", ["Int"]],
+      [
+        "block",
+        ["let", "%0", ["identity", ["constant", 11]]],
+        ["let", "%1", ["identity", ["constant", 13]]],
+        ["let", "%2", ["add", ["move", "%0"], ["peek", "%1"]]],
+        ["return", "%2"],
+      ],
+    ]];
+    expect(input).toBeDefined();
+    expect(print(input)).toEqual(text);
+    expect(evaluate(lower(input))).toBe(11 + 13);
+  });
+
+  it.skip("must allow consuming a phi operand", () => {
+    // TODO
+  });
+});
+
 describe("MIR: arithmetic operations", () => {
   it("must evaluate integer addition", () => {
     const text: string = `
