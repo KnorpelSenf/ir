@@ -2,6 +2,10 @@
 
 import * as MIR from "../middle/middle_grammar.ts";
 
+// TODO: A function argument which is a Borrowed type, needs a placeholder for
+// the unknown points-to set. One placeholder is required per argument which is
+// or contains a borrow.
+
 export function address_taken(fun: MIR.Function): MIR.ResourceId[] {
   const blocks: MIR.Block[] = fun.slice(4) as MIR.Block[];
   const intermediate_results: MIR.ResourceId[][] = blocks.map(
