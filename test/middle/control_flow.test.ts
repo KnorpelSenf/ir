@@ -7,6 +7,7 @@ import { evaluate } from "../../src/low/machine.ts";
 
 describe("MIR: jump", () => {
   it("must execute the correct line of code after an unconditional jump", () => {
+    // line CFG
     const text: string = `
 (program
   (function
@@ -50,6 +51,7 @@ describe("MIR: jump", () => {
 
 describe("MIR: branch", () => {
   it("must execute first branch if the condition is true", () => {
+    // split CFG
     const text: string = `
 (program
   (function
@@ -91,6 +93,7 @@ describe("MIR: branch", () => {
   });
 
   it("must execute second branch if the condition is false", () => {
+    // split CFG
     const text: string = `
 (program
   (function
@@ -132,6 +135,7 @@ describe("MIR: branch", () => {
   });
 
   it("must perform computations inside of branches", () => {
+    // diamond CFG
     const text: string = `
 (program
   (function
@@ -185,6 +189,7 @@ describe("MIR: branch", () => {
   });
 
   it("must throw an error when condition is not a boolean", () => {
+    // split
     const text: string = `
 (program
   (function
