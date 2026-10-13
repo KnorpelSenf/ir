@@ -42,165 +42,100 @@ Currently, there is no command-line interface, only tests.
 
 ## MIR Syntax
 
-The examples below use the block-parameter grammar in
-[new_grammar.ts](src/new/new_grammar.ts).
+An MIR program is an array of functions, with `@0` as its entry point. In the
+[block-parameter grammar](src/new/new_grammar.ts), numeric IDs identify
+resources (`%N`), functions (`@N`), and blocks (`^N`) by their zero-based
+positions. Function IDs are program-wide; block and resource IDs are local to a
+function. Resources are stack-frame slots, numbered with parameters first, then
+locals.
 
-Overall, an MIR program is an array of functions, where the function with index
-0 serves as the entry point or 'main' function.
-
-In MIR, all functions, code blocks, and resources (i.e. variables) are
-identified by a sigil prefix and numeric id, instead of a name. The sigil `%` is
-for resources, `@` for functions, and `^` for blocks. Although the numeric ids
-decrease human readability, they simplify the analysis and processing for which
-MIR is intended. The resources in a function are essentially slots in the stack
-frame. The parameters come first, starting at index 0, followed by the local
-variables. For example, a function which takes 2 parameters and has 3 local
-variables, has:
-
-- parameters with ids 0 and 1
-- local variables with ids 2, 3, and 4
-
-A very simple example of an MIR program is given by:
-
-```
-(program
-  (function
-    (parameters)
-    (locals Int Int)
-    (result Int)
-    (block
-      (bindings)
-      (instructions
-        (let %0 (identity (constant 13)))
-        (let %1 (identity (constant 42)))
-        (return %1)))))
-```
-
-This defines an MIR program with a single function. That function takes no
-parameters, has two local resources of type `Int` and returns a result of type
-`Int`. The function consists of a single block of code. That block of code
-defines resource #0 to have the constant value 13, defines resource #1 to have
-value 42, and returns resource #1. The right-hand side of a let-binding is
-always an operation. The `identity` function simply takes a value as it is.
-
-Overall, there are five fundamental syntactic forms in the body of an MIR
-function. They are illustrated by these examples:
-
-- `(let %0 (identity (constant 42)))` defines resource #0 with the value 42.
-- `(drop %0)` drops resource #0.
-- `(return %0)` returns resource #0 from the function.
-- `(jump (target ^1 (arguments)))` jumps to block #1 unconditionally without
-  arguments.
-- `(branch (peek %0) (target ^1 (arguments)) (target ^2 (arguments)))` branches
-  conditionally without arguments.
-
-Every value-producing line takes the form of a let-binding. The general form is
-`(let RESOURCE OPERATION)`. For example:
-
-- `(let %0 (identity (constant 42)))` loads the integer `42` into resource 0.
-- `(let %1 (add (peek %0) (move %2)))` adds two operands and binds the result to
-  resource 1.
-- `(let %2 (call @1 (arguments (peek %0))))` calls function #1, passes resource
-  #0 as an argument, and binds the result to resource #2.
-
-Operands are `(peek %N)` for non-consuming access, `(move %N)` for a destructive
-move, and `(constant N)` for an immediate integer. Block and function references
-are written as `^N` and `@N`.
-
-Every block contains an explicit `bindings` node followed by an `instructions`
-node. Incoming arguments bind to the listed resource IDs in order, like
-let-bindings evaluated before the first instruction. A function's first block
-binds its incoming function arguments; a function with two parameters starts
-with `(bindings %0 %1)`. The function's `parameters` and `locals` still declare
-the resource types. Entry bindings must use the canonical parameter IDs in
-order; other blocks can bind any declared resource IDs. Control-flow joins use
-MLIR-inspired block bindings: each predecessor passes its operands to the
-receiving block.
-
-All arguments on the chosen edge are captured before any destination binding is
-written. For example, passing `(peek %1) (peek %0)` to `(bindings %0 %1)` swaps
-the two values. A branch evaluates its condition first and evaluates only the
-selected target's arguments. Each target must supply exactly as many arguments
-as its destination has bindings, and calls must match their function's parameter
-count.
-
-Each resource has one static definition, either a block binding or a `let`.
-Repeated execution of that definition in a loop is allowed; defining the same
-resource in two places is rejected.
-
-Each control-flow edge carries a `target` containing the destination block and
-its own `arguments` node. A branch can pass different arguments to each
-successor. For example:
+This function adds 42 to its `Int` parameter, passes the result to a second
+block, and returns it:
 
 ```text
 (program
   (function
     (parameters Int)
-    (locals Int)
+    (locals Int Int)
     (result Int)
     (block
       (bindings %0)
       (instructions
-        (jump (target ^1 (arguments (peek %0))))))
+        (let %1 (add (peek %0) (constant 42)))
+        (jump (target ^1 (arguments (peek %1))))))
     (block
-      (bindings %1)
+      (bindings %2)
       (instructions
-        (return %1)))))
+        (return %2)))))
 ```
+
+Function bodies use five instruction forms:
+
+| Form                             | Meaning                                      |
+| -------------------------------- | -------------------------------------------- |
+| `(let RESOURCE OPERATION)`       | Define a resource with an operation's result |
+| `(drop RESOURCE)`                | Destroy a resource                           |
+| `(return RESOURCE)`              | Return a resource's value from the function  |
+| `(jump TARGET)`                  | Jump unconditionally to a block              |
+| `(branch OPERAND TARGET TARGET)` | Choose a target based on a condition         |
+
+Every value-producing operation appears on the right-hand side of a `let`.
+Operands are `(peek %N)` for non-consuming access, `(move %N)` for a destructive
+move, and `(constant N)` for an immediate integer. The `identity` operation
+copies an operand as-is; `call` uses `(call @N (arguments OPERAND...))`. See the
+[instruction reference](doc/instructions.md) for the full operation catalog and
+type signatures.
+
+### Blocks and Argument Binding
+
+A block has the structure
+`(block (bindings RESOURCE...) (instructions LINE...))`. Incoming arguments bind
+to the listed resources in order before the first instruction, like
+let-bindings. The function's `parameters` and `locals` lists declare resource
+types, and `result` declares its return type.
+
+The first block binds function arguments to their canonical parameter IDs:
+`(bindings %0 %1)` for two parameters, or `(bindings)` for none. Other blocks
+can bind any declared resource IDs. Calls must supply exactly the declared
+number of parameters.
+
+Each control-flow edge is `(target BLOCK (arguments OPERAND...))`. Branch
+targets can pass different arguments to their successors. Every edge must supply
+exactly one operand per destination binding, including edges not taken at
+runtime. Each resource has one static definition, either a binding or a `let`;
+that definition may execute repeatedly in a loop.
+
+A jump captures all arguments before writing destination bindings. A branch
+evaluates its condition first, then captures only the chosen target's arguments.
+This preserves repeated sources and cyclic transfers: the following edge swaps
+`%0` and `%1` when the destination has `(bindings %0 %1)`:
+
+```text
+(jump (target ^1 (arguments (peek %1) (peek %0))))
+```
+
+For argument transfers, `move` consumes its source after capture and before
+bindings are written. Runtime rules reject writing into a destroyed slot;
+support for consuming and later rebinding a block resource remains deferred, as
+does coverage of pointers passed as block arguments.
 
 ### Symbolic expressions vs. JSON
 
-The notation between symbolic expressions and JSON is slightly different. For
-MIR, both notations are designed to have identical structure. Having a
-straight-forward translation step makes it easier to reason about and write
-test-cases in either form.
+Symbolic expressions and JSON arrays have identical tagged structure, allowing
+direct translation for test fixtures:
 
 ```text
 (let %2 (add (peek %0) (peek %1)))
 ["let", "%2", ["add", ["peek", "%0"], ["peek", "%1"]]]
-
-(jump (target ^1 (arguments (peek %0))))
-["jump", ["target", "^1", ["arguments", ["peek", "%0"]]]]
-
-(branch (peek %0) (target ^1 (arguments (constant 42))) (target ^2 (arguments)))
-["branch", ["peek", "%0"], ["target", "^1", ["arguments", ["constant", 42]]], ["target", "^2", ["arguments"]]]
-
-(block
-  (bindings %1)
-  (instructions
-    (return %1)))
-["block", ["bindings", "%1"], ["instructions", ["return", "%1"]]]
 ```
 
 ### Formatting
 
-The printer uses two-space indentation, expands structural nodes, and keeps
-instructions and operands inline. Empty blocks print `(bindings)` and
-`(instructions)` explicitly. Closing parentheses follow the final child on the
-same line, and the complete printed program has a leading and trailing newline.
-Example of canonical formatting:
-
-```text
-(program
-  (function
-    (parameters Int)
-    (locals (Borrowed Int) Int Int Int)
-    (result Int)
-    (block
-      (bindings %0)
-      (instructions
-        (let %1 (borrow (peek %0)))
-        (let %2 (load (move %1)))
-        (branch (constant 0) (target ^1 (arguments (move %2))) (target ^2 (arguments (constant 42))))))
-    (block
-      (bindings %3)
-      (instructions
-        (return %3)))
-    (block
-      (bindings %4)
-      (instructions
-        (return %4)))))
-```
+As shown in the program above, the printer uses two-space indentation, expands
+structural nodes, and keeps instructions and operands inline. Empty blocks print
+`(bindings)` and `(instructions)` explicitly. Closing parentheses follow the
+final child on the same line, and a complete printed program has a leading and
+trailing newline.
 
 ## Source Layout
 
