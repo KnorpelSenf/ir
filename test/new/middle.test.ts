@@ -14,20 +14,29 @@ describe("MIR: literals and exit", () => {
     (locals Int)
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (return %0))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (return %0)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["return", "%0"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["return", "%0"],
+          ],
+        ],
       ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(11);
@@ -41,22 +50,31 @@ describe("MIR: literals and exit", () => {
     (locals Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (let %0 (identity (constant 13)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %0 (identity (constant 13)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%0", ["identity", ["constant", 13]]],
-        ["return", "%1"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%0", ["identity", ["constant", 13]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(() => {
@@ -72,12 +90,15 @@ describe("MIR: literals and exit", () => {
     (locals)
     (result Int)))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals"],
-      ["result", ["Int"]],
-    ]];
+    const input: MIR.Program = [
+      "program",
+      [
+        "function",
+        ["parameters"],
+        ["locals"],
+        ["result", ["Int"]],
+      ],
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(() => evaluate(lower(input))).toThrow();
@@ -91,22 +112,31 @@ describe("MIR: literals and exit", () => {
     (locals Int (Borrowed Int))
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (let %1 (borrow (peek %0)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %1 (borrow (peek %0)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Borrowed", ["Int"]]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["borrow", ["peek", "%0"]]],
-        ["return", "%1"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Borrowed", ["Int"]]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%1", ["borrow", ["peek", "%0"]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(() => evaluate(lower(input))).toThrow();
@@ -122,22 +152,31 @@ describe("MIR: copying of registers", () => {
     (locals Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (let %1 (identity (peek %0)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %1 (identity (peek %0)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["identity", ["peek", "%0"]]],
-        ["return", "%1"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%1", ["identity", ["peek", "%0"]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(11);
@@ -153,22 +192,31 @@ describe("MIR: moving of registers", () => {
     (locals Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (let %1 (identity (move %0)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %1 (identity (move %0)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["identity", ["move", "%0"]]],
-        ["return", "%1"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%1", ["identity", ["move", "%0"]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(11);
@@ -182,30 +230,39 @@ describe("MIR: moving of registers", () => {
     (locals Int Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (let %1 (identity (constant 13)))
-      (let %2 (add (move %0) (peek %1)))
-      (return %2))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %1 (identity (constant 13)))
+        (let %2 (add (move %0) (peek %1)))
+        (return %2)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["let", "%2", ["add", ["move", "%0"], ["peek", "%1"]]],
-        ["return", "%2"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%1", ["identity", ["constant", 13]]],
+            ["let", "%2", ["add", ["move", "%0"], ["peek", "%1"]]],
+            ["return", "%2"],
+          ],
+        ],
       ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(11 + 13);
   });
 
-  it.skip("must allow consuming a phi operand", () => {
+  it.skip("must allow consuming a block argument", () => {
     // TODO
   });
 });
@@ -219,24 +276,33 @@ describe("MIR: arithmetic operations", () => {
     (locals Int Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (let %1 (identity (constant 13)))
-      (let %2 (add (peek %0) (peek %1)))
-      (return %2))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %1 (identity (constant 13)))
+        (let %2 (add (peek %0) (peek %1)))
+        (return %2)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["let", "%2", ["add", ["peek", "%0"], ["peek", "%1"]]],
-        ["return", "%2"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%1", ["identity", ["constant", 13]]],
+            ["let", "%2", ["add", ["peek", "%0"], ["peek", "%1"]]],
+            ["return", "%2"],
+          ],
+        ],
       ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(11 + 13);
@@ -250,22 +316,31 @@ describe("MIR: arithmetic operations", () => {
     (locals Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (let %1 (add (peek %0) (constant 13)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %1 (add (peek %0) (constant 13)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["add", ["peek", "%0"], ["constant", 13]]],
-        ["return", "%1"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%1", ["add", ["peek", "%0"], ["constant", 13]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(11 + 13);

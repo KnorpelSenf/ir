@@ -15,34 +15,55 @@ describe("MIR: jump", () => {
     (locals Int Int)
     (result Int)
     (block
-      (jump ^2))
+      (bindings)
+      (instructions
+        (jump (target ^2 (arguments)))))
     (block
-      (let %0 (identity (constant 11)))
-      (return %0))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (return %0)))
     (block
-      (let %1 (identity (constant 13)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %1 (identity (constant 13)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["jump", "^2"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["jump", ["target", "^2", ["arguments"]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["return", "%0"],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%1", ["identity", ["constant", 13]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["return", "%0"],
-      ],
-      [
-        "block",
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["return", "%1"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(13);
@@ -59,34 +80,60 @@ describe("MIR: branch", () => {
     (locals Int Int)
     (result Int)
     (block
-      (branch (constant 1) ^1 ^2))
+      (bindings)
+      (instructions
+        (branch (constant 1) (target ^1 (arguments)) (target ^2 (arguments)))))
     (block
-      (let %0 (identity (constant 11)))
-      (return %0))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (return %0)))
     (block
-      (let %1 (identity (constant 13)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %1 (identity (constant 13)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["branch", ["constant", 1], "^1", "^2"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            [
+              "branch",
+              ["constant", 1],
+              ["target", "^1", ["arguments"]],
+              ["target", "^2", ["arguments"]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["return", "%0"],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%1", ["identity", ["constant", 13]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["return", "%0"],
-      ],
-      [
-        "block",
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["return", "%1"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(11);
@@ -101,34 +148,60 @@ describe("MIR: branch", () => {
     (locals Int Int)
     (result Int)
     (block
-      (branch (constant 0) ^1 ^2))
+      (bindings)
+      (instructions
+        (branch (constant 0) (target ^1 (arguments)) (target ^2 (arguments)))))
     (block
-      (let %0 (identity (constant 11)))
-      (return %0))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (return %0)))
     (block
-      (let %1 (identity (constant 13)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %1 (identity (constant 13)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["branch", ["constant", 0], "^1", "^2"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            [
+              "branch",
+              ["constant", 0],
+              ["target", "^1", ["arguments"]],
+              ["target", "^2", ["arguments"]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["return", "%0"],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%1", ["identity", ["constant", 13]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["return", "%0"],
-      ],
-      [
-        "block",
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["return", "%1"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(13);
@@ -143,46 +216,78 @@ describe("MIR: branch", () => {
     (locals Int Int Int Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 11)))
-      (let %1 (identity (constant 13)))
-      (let %2 (identity (constant 281)))
-      (branch (constant 0) ^1 ^2))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %1 (identity (constant 13)))
+        (let %2 (identity (constant 281)))
+        (branch (constant 0) (target ^1 (arguments)) (target ^2 (arguments)))))
     (block
-      (let %3 (add (peek %0) (peek %1)))
-      (jump ^3))
+      (bindings)
+      (instructions
+        (let %3 (add (peek %0) (peek %1)))
+        (jump (target ^3 (arguments)))))
     (block
-      (let %4 (add (peek %1) (peek %2)))
-      (jump ^3))
+      (bindings)
+      (instructions
+        (let %4 (add (peek %1) (peek %2)))
+        (jump (target ^3 (arguments)))))
     (block
-      (return %4))))
+      (bindings)
+      (instructions
+        (return %4)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["let", "%2", ["identity", ["constant", 281]]],
-        ["branch", ["constant", 0], "^1", "^2"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"], ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%1", ["identity", ["constant", 13]]],
+            ["let", "%2", ["identity", ["constant", 281]]],
+            [
+              "branch",
+              ["constant", 0],
+              ["target", "^1", ["arguments"]],
+              ["target", "^2", ["arguments"]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%3", ["add", ["peek", "%0"], ["peek", "%1"]]],
+            ["jump", ["target", "^3", ["arguments"]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%4", ["add", ["peek", "%1"], ["peek", "%2"]]],
+            ["jump", ["target", "^3", ["arguments"]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["return", "%4"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%3", ["add", ["peek", "%0"], ["peek", "%1"]]],
-        ["jump", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%4", ["add", ["peek", "%1"], ["peek", "%2"]]],
-        ["jump", "^3"],
-      ],
-      [
-        "block",
-        ["return", "%4"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(13 + 281);
@@ -197,42 +302,68 @@ describe("MIR: branch", () => {
     (locals Int Int)
     (result Int)
     (block
-      (branch (constant 2) ^1 ^2))
+      (bindings)
+      (instructions
+        (branch (constant 2) (target ^1 (arguments)) (target ^2 (arguments)))))
     (block
-      (let %0 (identity (constant 11)))
-      (return %0))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (return %0)))
     (block
-      (let %1 (identity (constant 13)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %1 (identity (constant 13)))
+        (return %1)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["branch", ["constant", 2], "^1", "^2"], // error: 2 is not a boolean
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            [
+              "branch",
+              ["constant", 2],
+              ["target", "^1", ["arguments"]],
+              ["target", "^2", ["arguments"]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["return", "%0"],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%1", ["identity", ["constant", 13]]],
+            ["return", "%1"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["return", "%0"],
-      ],
-      [
-        "block",
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["return", "%1"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(() => evaluate(lower(input))).toThrow();
   });
 });
 
-describe("MIR: phi (control flow join)", () => {
-  it("phi node must assign from the correct register after an unconditional jump", () => {
+describe("MIR: block parameters (control flow join)", () => {
+  it("block bindings must assign from the correct register after an unconditional jump", () => {
     const text: string = `
 (program
   (function
@@ -240,52 +371,73 @@ describe("MIR: phi (control flow join)", () => {
     (locals Int Int Int)
     (result Int)
     (block
-      (jump ^2))
+      (bindings)
+      (instructions
+        (jump (target ^2 (arguments)))))
     (block
-      (let %0 (identity (constant 11)))
-      (jump ^3))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (jump (target ^3 (arguments (peek %0))))))
     (block
-      (let %1 (identity (constant 13)))
-      (jump ^3))
+      (bindings)
+      (instructions
+        (let %1 (identity (constant 13)))
+        (jump (target ^3 (arguments (peek %1))))))
     (block
-      (let %2 (phi (sources (from ^1 (peek %0)) (from ^2 (peek %1)))))
-      (return %2))))
+      (bindings %2)
+      (instructions
+        (return %2)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["jump", "^2"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["jump", ["target", "^2", ["arguments"]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["jump", ["target", "^3", ["arguments", ["peek", "%0"]]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%1", ["identity", ["constant", 13]]],
+            ["jump", ["target", "^3", ["arguments", ["peek", "%1"]]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings", "%2"],
+          [
+            "instructions",
+            ["return", "%2"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["jump", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["jump", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%2", ["phi", [
-          "sources",
-          ["from", "^1", ["peek", "%0"]],
-          ["from", "^2", ["peek", "%1"]],
-        ]]],
-        ["return", "%2"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(13);
   });
 
-  it("phi node must assign from the correct register when executing a loop", () => {
+  it("block bindings must assign from the correct register when executing a loop", () => {
     // C-style:
     //
     // int i = 0;
@@ -304,52 +456,72 @@ describe("MIR: phi (control flow join)", () => {
     (locals Int Int Int Int Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 0)))
-      (let %1 (identity (constant 1)))
-      (let %2 (identity (constant 3)))
-      (jump ^1))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (let %1 (identity (constant 1)))
+        (let %2 (identity (constant 3)))
+        (jump (target ^1 (arguments (peek %0))))))
     (block
-      (let %3 (phi (sources (from ^0 (peek %0)) (from ^1 (peek %4)))))
-      (let %4 (add (peek %1) (peek %3)))
-      (let %5 (unequal (peek %3) (peek %2)))
-      (branch (peek %5) ^1 ^2))
+      (bindings %3)
+      (instructions
+        (let %4 (add (peek %1) (peek %3)))
+        (let %5 (unequal (peek %3) (peek %2)))
+        (branch (peek %5) (target ^1 (arguments (peek %4))) (target ^2 (arguments)))))
     (block
-      (return %3))))
+      (bindings)
+      (instructions
+        (return %3)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"], ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["let", "%1", ["identity", ["constant", 1]]],
-        ["let", "%2", ["identity", ["constant", 3]]],
-        ["jump", "^1"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"], ["Int"], ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 0]]],
+            ["let", "%1", ["identity", ["constant", 1]]],
+            ["let", "%2", ["identity", ["constant", 3]]],
+            ["jump", ["target", "^1", ["arguments", ["peek", "%0"]]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings", "%3"],
+          [
+            "instructions",
+            ["let", "%4", ["add", ["peek", "%1"], ["peek", "%3"]]],
+            ["let", "%5", ["unequal", ["peek", "%3"], ["peek", "%2"]]],
+            [
+              "branch",
+              ["peek", "%5"],
+              ["target", "^1", ["arguments", ["peek", "%4"]]],
+              ["target", "^2", ["arguments"]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["return", "%3"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%3", ["phi", [
-          "sources",
-          ["from", "^0", ["peek", "%0"]],
-          ["from", "^1", ["peek", "%4"]],
-        ]]],
-        ["let", "%4", ["add", ["peek", "%1"], ["peek", "%3"]]],
-        ["let", "%5", ["unequal", ["peek", "%3"], ["peek", "%2"]]],
-        ["branch", ["peek", "%5"], "^1", "^2"],
-      ],
-      [
-        "block",
-        ["return", "%3"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(3);
   });
 
-  it("phi node must allow assignment from dominator blocks which are not the immediate dominator", () => {
+  it("block bindings must allow assignment from dominator blocks which are not the immediate dominator", () => {
     // Control flow graph with a split in the Entry node and a Join in node D
     //
     //      Entry
@@ -368,71 +540,105 @@ describe("MIR: phi (control flow join)", () => {
     (locals Int Int Int Int Int Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 0)))
-      (branch (peek %0) ^1 ^2))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (branch (peek %0) (target ^1 (arguments)) (target ^2 (arguments)))))
     (block
-      (let %1 (identity (constant 11)))
-      (jump ^4))
+      (bindings)
+      (instructions
+        (let %1 (identity (constant 11)))
+        (jump (target ^4 (arguments (peek %1) (peek %1))))))
     (block
-      (let %2 (identity (constant 13)))
-      (jump ^3))
+      (bindings)
+      (instructions
+        (let %2 (identity (constant 13)))
+        (jump (target ^3 (arguments)))))
     (block
-      (let %3 (identity (constant 281)))
-      (jump ^4))
+      (bindings)
+      (instructions
+        (let %3 (identity (constant 281)))
+        (jump (target ^4 (arguments (peek %2) (peek %3))))))
     (block
-      (let %4 (phi (sources (from ^1 (peek %1)) (from ^3 (peek %2)))))
-      (let %5 (phi (sources (from ^1 (peek %1)) (from ^3 (peek %3)))))
-      (let %6 (add (peek %4) (peek %5)))
-      (return %6))))
+      (bindings %4 %5)
+      (instructions
+        (let %6 (add (peek %4) (peek %5)))
+        (return %6)))))
 `;
 
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"], ["Int"], ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["branch", ["peek", "%0"], "^1", "^2"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"], ["Int"], ["Int"], ["Int"], [
+          "Int",
+        ]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 0]]],
+            [
+              "branch",
+              ["peek", "%0"],
+              ["target", "^1", ["arguments"]],
+              ["target", "^2", ["arguments"]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%1", ["identity", ["constant", 11]]],
+            ["jump", ["target", "^4", ["arguments", ["peek", "%1"], [
+              "peek",
+              "%1",
+            ]]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%2", ["identity", ["constant", 13]]],
+            ["jump", ["target", "^3", ["arguments"]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%3", ["identity", ["constant", 281]]],
+            ["jump", ["target", "^4", ["arguments", ["peek", "%2"], [
+              "peek",
+              "%3",
+            ]]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings", "%4", "%5"],
+          [
+            "instructions",
+            ["let", "%6", ["add", ["peek", "%4"], ["peek", "%5"]]],
+            ["return", "%6"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%1", ["identity", ["constant", 11]]],
-        ["jump", "^4"],
-      ],
-      [
-        "block",
-        ["let", "%2", ["identity", ["constant", 13]]],
-        ["jump", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%3", ["identity", ["constant", 281]]],
-        ["jump", "^4"],
-      ],
-      [
-        "block",
-        ["let", "%4", ["phi", [
-          "sources",
-          ["from", "^1", ["peek", "%1"]],
-          ["from", "^3", ["peek", "%2"]],
-        ]]],
-        ["let", "%5", ["phi", [
-          "sources",
-          ["from", "^1", ["peek", "%1"]],
-          ["from", "^3", ["peek", "%3"]],
-        ]]],
-        ["let", "%6", ["add", ["peek", "%4"], ["peek", "%5"]]],
-        ["return", "%6"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(13 + 281);
   });
 
-  it("phi node must allow assignment when both inputs are available", () => {
+  it("block bindings must allow assignment when both inputs are available", () => {
     //
     //      Entry
     //        |
@@ -450,48 +656,74 @@ describe("MIR: phi (control flow join)", () => {
     (locals Int Int Int Int)
     (result Int)
     (block
-      (jump ^1))
+      (bindings)
+      (instructions
+        (jump (target ^1 (arguments)))))
     (block
-      (let %0 (identity (constant 11)))
-      (let %1 (identity (constant 1)))
-      (branch (peek %1) ^2 ^3))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 11)))
+        (let %1 (identity (constant 1)))
+        (branch (peek %1) (target ^2 (arguments)) (target ^3 (arguments (peek %0))))))
     (block
-      (let %2 (identity (constant 13)))
-      (jump ^3))
+      (bindings)
+      (instructions
+        (let %2 (identity (constant 13)))
+        (jump (target ^3 (arguments (peek %2))))))
     (block
-      (let %3 (phi (sources (from ^1 (peek %0)) (from ^2 (peek %2)))))
-      (return %3))))
+      (bindings %3)
+      (instructions
+        (return %3)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["jump", "^1"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["jump", ["target", "^1", ["arguments"]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 11]]],
+            ["let", "%1", ["identity", ["constant", 1]]],
+            [
+              "branch",
+              ["peek", "%1"],
+              ["target", "^2", ["arguments"]],
+              ["target", "^3", ["arguments", ["peek", "%0"]]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%2", ["identity", ["constant", 13]]],
+            ["jump", ["target", "^3", ["arguments", ["peek", "%2"]]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings", "%3"],
+          [
+            "instructions",
+            ["return", "%3"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["let", "%1", ["identity", ["constant", 1]]],
-        ["branch", ["peek", "%1"], "^2", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%2", ["identity", ["constant", 13]]],
-        ["jump", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%3", ["phi", [
-          "sources",
-          ["from", "^1", ["peek", "%0"]],
-          ["from", "^2", ["peek", "%2"]],
-        ]]],
-        ["return", "%3"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(13);
@@ -515,55 +747,85 @@ describe("MIR: phi (control flow join)", () => {
     (locals Int Int Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 0)))
-      (branch (peek %0) ^1 ^3))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (branch (peek %0) (target ^1 (arguments)) (target ^3 (arguments (peek %0))))))
     (block
-      (let %1 (identity (constant 1)))
-      (branch (peek %1) ^2 ^3))
+      (bindings)
+      (instructions
+        (let %1 (identity (constant 1)))
+        (branch (peek %1) (target ^2 (arguments)) (target ^3 (arguments (peek %1))))))
     (block
-      (let %2 (identity (constant 1)))
-      (jump ^3))
+      (bindings)
+      (instructions
+        (let %2 (identity (constant 1)))
+        (jump (target ^3 (arguments (peek %2))))))
     (block
-      (let %3 (phi (sources (from ^0 (peek %0)) (from ^1 (peek %1)) (from ^2 (peek %2)))))
-      (return %3))))
+      (bindings %3)
+      (instructions
+        (return %3)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["branch", ["peek", "%0"], "^1", "^3"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 0]]],
+            [
+              "branch",
+              ["peek", "%0"],
+              ["target", "^1", ["arguments"]],
+              ["target", "^3", ["arguments", ["peek", "%0"]]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%1", ["identity", ["constant", 1]]],
+            [
+              "branch",
+              ["peek", "%1"],
+              ["target", "^2", ["arguments"]],
+              ["target", "^3", ["arguments", ["peek", "%1"]]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%2", ["identity", ["constant", 1]]],
+            ["jump", ["target", "^3", ["arguments", ["peek", "%2"]]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings", "%3"],
+          [
+            "instructions",
+            ["return", "%3"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%1", ["identity", ["constant", 1]]],
-        ["branch", ["peek", "%1"], "^2", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%2", ["identity", ["constant", 1]]],
-        ["jump", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%3", ["phi", [
-          "sources",
-          ["from", "^0", ["peek", "%0"]],
-          ["from", "^1", ["peek", "%1"]],
-          ["from", "^2", ["peek", "%2"]],
-        ]]],
-        ["return", "%3"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(evaluate(lower(input))).toBe(0);
   });
 
-  it("must throw an error when a phi node is non-exhaustive", () => {
+  it("must throw when a block argument is missing", () => {
     //
     //        Entry
     //        |   |
@@ -581,48 +843,79 @@ describe("MIR: phi (control flow join)", () => {
     (locals Int Int Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 0)))
-      (branch (peek %0) ^1 ^3))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (branch (peek %0) (target ^1 (arguments)) (target ^3 (arguments)))))
     (block
-      (let %1 (identity (constant 1)))
-      (branch (peek %1) ^2 ^3))
+      (bindings)
+      (instructions
+        (let %1 (identity (constant 1)))
+        (branch (peek %1) (target ^2 (arguments)) (target ^3 (arguments (peek %1))))))
     (block
-      (let %2 (identity (constant 1)))
-      (jump ^3))
+      (bindings)
+      (instructions
+        (let %2 (identity (constant 1)))
+        (jump (target ^3 (arguments (peek %2))))))
     (block
-      (let %3 (phi (sources (from ^1 (peek %1)) (from ^2 (peek %2)))))
-      (return %3))))
+      (bindings %3)
+      (instructions
+        (return %3)))))
 `;
-    const input: MIR.Program = ["program", [
-      "function",
-      ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"], ["Int"]],
-      ["result", ["Int"]],
+    const input: MIR.Program = [
+      "program",
       [
-        "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["branch", ["peek", "%0"], "^1", "^3"],
+        "function",
+        ["parameters"],
+        ["locals", ["Int"], ["Int"], ["Int"], ["Int"]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%0", ["identity", ["constant", 0]]],
+            [
+              "branch",
+              ["peek", "%0"],
+              ["target", "^1", ["arguments"]],
+              ["target", "^3", ["arguments"]], // error: missing argument
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%1", ["identity", ["constant", 1]]],
+            [
+              "branch",
+              ["peek", "%1"],
+              ["target", "^2", ["arguments"]],
+              ["target", "^3", ["arguments", ["peek", "%1"]]],
+            ],
+          ],
+        ],
+        [
+          "block",
+          ["bindings"],
+          [
+            "instructions",
+            ["let", "%2", ["identity", ["constant", 1]]],
+            ["jump", ["target", "^3", ["arguments", ["peek", "%2"]]]],
+          ],
+        ],
+        [
+          "block",
+          ["bindings", "%3"],
+          [
+            "instructions",
+            ["return", "%3"],
+          ],
+        ],
       ],
-      [
-        "block",
-        ["let", "%1", ["identity", ["constant", 1]]],
-        ["branch", ["peek", "%1"], "^2", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%2", ["identity", ["constant", 1]]],
-        ["jump", "^3"],
-      ],
-      [
-        "block",
-        ["let", "%3", ["phi", [
-          "sources",
-          ["from", "^1", ["peek", "%1"]],
-          ["from", "^2", ["peek", "%2"]],
-        ]]],
-        ["return", "%3"],
-      ],
-    ]];
+    ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
     // expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error

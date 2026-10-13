@@ -15,6 +15,10 @@ Programs are constructed directly as tagged tuples in TypeScript and checked by
 the type checker. There is no parser. MIR has a pretty-printer for readable test
 fixtures and debugging.
 
+A block-parameter version of MIR is being introduced in
+[new_grammar.ts](src/new/new_grammar.ts). The executable lowering pipeline still
+uses the phi-based grammar in `src/middle/`.
+
 The MIR-to-LIR compilation pipeline is completely AI-generated, from
 human-defined interfaces and human-defined end-to-end tests. It uses a
 micro-pass architecture inspired by the Chez Scheme compiler.
@@ -42,6 +46,9 @@ Currently, there is no command-line interface, only tests.
 
 ## MIR Syntax
 
+The examples below use the block-parameter grammar in
+[new_grammar.ts](src/new/new_grammar.ts).
+
 Overall, an MIR program is an array of functions, where the function with index
 0 serves as the entry point or 'main' function.
 
@@ -66,9 +73,11 @@ A very simple example of an MIR program is given by:
     (locals Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 13)))
-      (let %1 (identity (constant 42)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 13)))
+        (let %1 (identity (constant 42)))
+        (return %1)))))
 ```
 
 This defines an MIR program with a single function. That function takes no
@@ -84,8 +93,10 @@ function. They are illustrated by these examples:
 - `(let %0 (identity (constant 42)))` defines resource #0 with the value 42.
 - `(drop %0)` drops resource #0.
 - `(return %0)` returns resource #0 from the function.
-- `(jump ^1)` jumps to block #1 unconditionally.
-- `(branch (peek %0) ^1 ^2)` branches conditionally.
+- `(jump (target ^1 (arguments)))` jumps to block #1 unconditionally and passes
+  arguments.
+- `(branch (peek %0) (target ^1 (arguments)) (target ^2 (arguments)))` branches
+  conditionally and passes arguments.
 
 Every value-producing line takes the form of a let-binding. The general form is
 `(let RESOURCE OPERATION)`. For example:
@@ -93,14 +104,40 @@ Every value-producing line takes the form of a let-binding. The general form is
 - `(let %0 (identity (constant 42)))` loads the integer `42` into resource 0.
 - `(let %1 (add (peek %0) (move %2)))` adds two operands and binds the result to
   resource 1.
-- `(let %2 (phi (sources (from ^1 (peek %2)) (from ^2 (move %3)))))` selects a
-  value based on the predecessor block.
-- `(let %3 (call @1 (arguments (peek %0))))` calls function #1, pass resource #0
+- `(let %2 (call @1 (arguments (peek %0))))` calls function #1, pass resource #0
   as an argument, and bind the result to resource #3.
 
 Operands are `(peek %N)` for non-consuming access, `(move %N)` for a destructive
 move, and `(constant N)` for an immediate integer. Block and function references
 are written as `^N` and `@N`.
+
+Every block contains an explicit `bindings` node followed by an `instructions`
+node. Incoming arguments bind to the listed resource IDs in order, like
+let-bindings evaluated before the first instruction. A function's first block
+binds its incoming function arguments; a function with two parameters starts
+with `(bindings %0 %1)`. The function's `parameters` and `locals` still declare
+the resource types. Control-flow joins use MLIR-inspired block bindings in place
+of phi operations: each predecessor passes its operands to the receiving block.
+
+Each control-flow edge carries a `target` containing the destination block and
+its own `arguments` node. A branch can pass different arguments to each
+successor. For example:
+
+```text
+(program
+  (function
+    (parameters Int)
+    (locals Int)
+    (result Int)
+    (block
+      (bindings %0)
+      (instructions
+        (jump (target ^1 (arguments (peek %0))))))
+    (block
+      (bindings %1)
+      (instructions
+        (return %1)))))
+```
 
 ### Symbolic expressions vs. JSON
 
@@ -112,27 +149,48 @@ test-cases in either form.
 ```text
 (let %2 (add (peek %0) (peek %1)))
 ["let", "%2", ["add", ["peek", "%0"], ["peek", "%1"]]]
+
+(jump (target ^1 (arguments (peek %0))))
+["jump", ["target", "^1", ["arguments", ["peek", "%0"]]]]
+
+(branch (peek %0) (target ^1 (arguments (constant 42))) (target ^2 (arguments)))
+["branch", ["peek", "%0"], ["target", "^1", ["arguments", ["constant", 42]]], ["target", "^2", ["arguments"]]]
+
+(block
+  (bindings %1)
+  (instructions
+    (return %1)))
+["block", ["bindings", "%1"], ["instructions", ["return", "%1"]]]
 ```
 
 ### Formatting
 
-Structural nodes are expanded over indented lines by the printer, while
-instructions and operands remain inline. Variadic phi inputs and call operands
-are wrapped in explicit `(sources ...)` and `(arguments ...)` nodes such that
-every tuple is tagged. Example of canonical formatting:
+The printer uses two-space indentation, expands structural nodes, and keeps
+instructions and operands inline. Empty blocks print `(bindings)` and
+`(instructions)` explicitly. Closing parentheses follow the final child on the
+same line, and the complete printed program has a leading and trailing newline.
+Example of canonical formatting:
 
 ```text
 (program
   (function
     (parameters Int)
-    (locals (Borrowed Int))
+    (locals (Borrowed Int) Int Int Int)
     (result Int)
     (block
-      (let %0 (phi (sources (from ^1 (peek %2)) (from ^2 (move %3)))))
-      (let %1 (call @0 (arguments (peek %0) (move %2))))
-      (branch (constant 0) ^1 ^2))
+      (bindings %0)
+      (instructions
+        (let %1 (borrow (peek %0)))
+        (let %2 (load (move %1)))
+        (branch (constant 0) (target ^1 (arguments (move %2))) (target ^2 (arguments (constant 42))))))
     (block
-      (return %1))))
+      (bindings %3)
+      (instructions
+        (return %3)))
+    (block
+      (bindings %4)
+      (instructions
+        (return %4)))))
 ```
 
 ## Source Layout

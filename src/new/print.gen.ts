@@ -38,9 +38,17 @@ function print_locals([, ...types]: MIR.Locals): string {
   return print_list("locals", types.map(print_type));
 }
 
-function print_block([, ...lines]: MIR.Block): string {
-  if (lines.length === 0) return "(block)";
-  return `(block\n${lines.map((line) => indent(print_line(line))).join("\n")})`;
+function print_block([, [, ...bindings], [, ...lines]]: MIR.Block): string {
+  const instructions = lines.length === 0
+    ? "(instructions)"
+    : `(instructions\n${
+      lines.map((line) => indent(print_line(line))).join("\n")
+    })`;
+  return [
+    "(block",
+    indent(print_list("bindings", bindings)),
+    indent(instructions),
+  ].join("\n") + ")";
 }
 
 function print_line(line: MIR.Line): string {
@@ -54,11 +62,13 @@ function print_line(line: MIR.Line): string {
     case "branch":
       return print_list("branch", [
         print_input(line[1]),
-        line[2],
-        line[3],
+        print_list("target", [line[2][1], print_arguments(line[2][2])]),
+        print_list("target", [line[3][1], print_arguments(line[3][2])]),
       ]);
     case "jump":
-      return print_list("jump", [line[1]]);
+      return print_list("jump", [
+        print_list("target", [line[1][1], print_arguments(line[1][2])]),
+      ]);
     default:
       return assert_never(line);
   }
@@ -66,8 +76,6 @@ function print_line(line: MIR.Line): string {
 
 function print_value(value: MIR.Operation): string {
   switch (value[0]) {
-    case "phi":
-      return print_list("phi", [print_sources(value[1])]);
     case "call":
       return print_list("call", [
         value[1],
@@ -103,14 +111,6 @@ function print_value(value: MIR.Operation): string {
 
 function print_arguments([, ...arguments_]: MIR.Arguments): string {
   return print_list("arguments", arguments_.map(print_input));
-}
-
-function print_sources([, ...sources]: MIR.Sources): string {
-  return print_list("sources", sources.map(print_source));
-}
-
-function print_source([, block, register]: MIR.From): string {
-  return print_list("from", [block, print_input(register)]);
 }
 
 function print_input(input: MIR.Peek | MIR.Move | MIR.Constant): string {
