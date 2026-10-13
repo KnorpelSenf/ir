@@ -77,9 +77,7 @@ describe("MIR: literals and exit", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    expect(() => {
-    //   evaluate(lower(input));
-    // }).toThrow();
+    expect(() => evaluate(lower(input))).toThrow();
   });
 
   it("must throw error on empty input", () => {
