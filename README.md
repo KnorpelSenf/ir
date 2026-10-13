@@ -147,6 +147,14 @@ trailing newline.
 | [types.ts](src/new/types.ts)             | Defines MIR value and ownership types.                                                        |
 | [print.gen.ts](src/new/print.gen.ts)     | Pretty-prints MIR programs as canonical, indented symbolic expressions.                       |
 
+### MIR Analysis
+
+| File / Directory                                            | Description                                                       |
+| ----------------------------------------------------------- | ----------------------------------------------------------------- |
+| [address_taken.ts](src/analysis/address_taken.ts)           | Collects borrowed resource IDs from block instructions.           |
+| [control_flow_graph.ts](src/analysis/control_flow_graph.ts) | Builds predecessor and successor lists from control-flow targets. |
+| [pointer_return.ts](src/analysis/pointer_return.ts)         | Checks whether the declared result type contains a borrow.        |
+
 ### MIR-to-LIR Lowering (AI-generated)
 
 The pipeline has three passes: validation and indexing, operation and argument
@@ -188,6 +196,9 @@ Notes:
 | [functions.test.ts](test/new/functions.test.ts)             | End-to-end MIR tests for function calls.                                   |
 | [memory.test.ts](test/new/memory.test.ts)                   | End-to-end MIR tests for memory and ownership.                             |
 | [print.gen.test.ts](test/new/print.gen.test.ts)             | MIR pretty-printer coverage.                                               |
+| [address_taken.test.ts](test/analysis/address_taken.test.ts) | Tests borrowed resource ID collection with literal MIR fixtures.          |
+| [control_flow_graph.test.ts](test/analysis/control_flow_graph.test.ts) | Tests control-flow predecessor and successor lists with literal MIR fixtures. |
+| [pointer_return.test.ts](test/analysis/pointer_return.test.ts) | Tests pointer-return detection from declared MIR result types.             |
 | [passes.gen.test.ts](test/middle_to_low/passes.gen.test.ts) | MIR-to-LIR micro-pass tests.                                               |
 | [runtime.test.ts](test/low/runtime.test.ts)                 | Direct LIR runtime tests.                                                  |
 
