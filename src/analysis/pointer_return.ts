@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Marco Nikander
 
 import * as MIR from "../middle/middle_grammar.ts";
-import { contains_borrow } from "../middle/types.ts";
+import { contains_borrow } from "../new/types.ts";
 
 // be careful to annotate the result type of functions correctly, since this
 // implementation depends entirely on the type information, but without a

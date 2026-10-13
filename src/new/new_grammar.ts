@@ -2,8 +2,8 @@
 
 // New version of a middle intermediate representation (MIR) which features MLIR-style block parameters instead of phi-nodes.
 
-import { Type } from "../middle/types.ts";
-export type { Type } from "../middle/types.ts";
+import { Type } from "./types.ts";
+export type { Type } from "./types.ts";
 
 export type Program      = [ tag: "program", ...Function[] ];
 export type Function     = [ tag: "function", Parameters, Locals, Result, ...Block[] ];
