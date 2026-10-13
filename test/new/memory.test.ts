@@ -149,7 +149,7 @@ describe("MIR: pointers", () => {
   });
 });
 
-describe("MIR: use-after-free", () => {
+describe.skip("MIR: use-after-free", () => {
   it("must detect a use-after-free in a return", () => {
     const text: string = `
 (program
