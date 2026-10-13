@@ -1,0 +1,191 @@
+import { describe, it } from "@std/testing/bdd";
+import { expect } from "@std/expect";
+import * as MIR from "../../src/new/new_grammar.ts";
+import { print } from "../../src/new/print.gen.ts";
+
+describe("MIR printer", () => {
+  it("prints empty and typed structural nodes", () => {
+    const empty: MIR.Program = ["program"];
+    expect(print(empty)).toBe("\n(program)\n");
+
+    const input: MIR.Program = [
+      "program",
+      [
+        "function",
+        ["parameters", ["Int"], ["Borrowed", ["Borrowed", ["Int"]]]],
+        ["locals"],
+        ["result", ["Borrowed", ["Int"]]],
+      ],
+    ];
+
+    expect(print(input)).toBe(
+      "\n(program\n" +
+        "  (function\n" +
+        "    (parameters Int (Borrowed (Borrowed Int)))\n" +
+        "    (locals)\n" +
+        "    (result (Borrowed Int))))\n",
+    );
+
+    const empty_block: MIR.Program = [
+      "program",
+      [
+        "function",
+        ["parameters"],
+        ["locals"],
+        ["result", ["Int"]],
+        ["block"],
+      ],
+    ];
+    expect(print(empty_block)).toBe(
+      "\n(program\n" +
+        "  (function\n" +
+        "    (parameters)\n" +
+        "    (locals)\n" +
+        "    (result Int)\n" +
+        "    (block)))\n",
+    );
+  });
+
+  it("prints phi, calls, memory operations, and multiple functions", () => {
+    const input: MIR.Program = [
+      "program",
+      [
+        "function",
+        ["parameters", ["Int"]],
+        ["locals", ["Int"], ["Borrowed", ["Int"]]],
+        ["result", ["Int"]],
+        [
+          "block",
+          ["let", "%0", ["phi", ["sources", ["from", "^1", ["peek", "%2"]], [
+            "from",
+            "^2",
+            ["move", "%3"],
+          ]]]],
+          ["let", "%1", ["call", "@0", [
+            "arguments",
+            ["peek", "%0"],
+            ["move", "%2"],
+          ]]],
+          ["let", "%2", ["call", "@1", ["arguments"]]],
+          ["let", "%3", ["identity", ["constant", 42]]],
+          ["let", "%4", ["identity", ["peek", "%3"]]],
+          ["let", "%5", ["borrow", ["peek", "%4"]]],
+          ["let", "%6", ["borrow", ["peek", "%5"]]],
+          ["let", "%7", ["load", ["move", "%6"]]],
+          ["drop", "%5"],
+          ["return", "%7"],
+        ],
+        ["block"],
+      ],
+      [
+        "function",
+        ["parameters"],
+        ["locals"],
+        ["result", ["Int"]],
+        ["block", ["return", "%0"]],
+      ],
+    ];
+
+    expect(print(input)).toBe(
+      "\n(program\n" +
+        "  (function\n" +
+        "    (parameters Int)\n" +
+        "    (locals Int (Borrowed Int))\n" +
+        "    (result Int)\n" +
+        "    (block\n" +
+        "      (let %0 (phi (sources (from ^1 (peek %2)) (from ^2 (move %3)))))\n" +
+        "      (let %1 (call @0 (arguments (peek %0) (move %2))))\n" +
+        "      (let %2 (call @1 (arguments)))\n" +
+        "      (let %3 (identity (constant 42)))\n" +
+        "      (let %4 (identity (peek %3)))\n" +
+        "      (let %5 (borrow (peek %4)))\n" +
+        "      (let %6 (borrow (peek %5)))\n" +
+        "      (let %7 (load (move %6)))\n" +
+        "      (drop %5)\n" +
+        "      (return %7))\n" +
+        "    (block))\n" +
+        "  (function\n" +
+        "    (parameters)\n" +
+        "    (locals)\n" +
+        "    (result Int)\n" +
+        "    (block\n" +
+        "      (return %0))))\n",
+    );
+  });
+
+  it("prints every arithmetic, comparison, and control-flow instruction", () => {
+    const binary_tags = [
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "remainder",
+      "minimum",
+      "maximum",
+      "equal",
+      "unequal",
+      "less",
+      "less_equal",
+      "greater",
+      "greater_equal",
+    ] as const;
+    const lines: MIR.Line[] = binary_tags.map((
+      tag,
+      index,
+    ) => ["let", MIR.resource_id(index), [tag, ["peek", "%0"], [
+      "move",
+      "%1",
+    ]]]);
+    lines.push(
+      ["let", "%13", ["negate", ["peek", "%2"]]],
+      ["branch", ["constant", 0], "^1", "^2"],
+      ["return", "%13"],
+    );
+    const input: MIR.Program = [
+      "program",
+      ["function", ["parameters"], ["locals"], ["result", ["Int"]], [
+        "block",
+        ...lines,
+      ]],
+    ];
+
+    const expected_lines = binary_tags.map((tag, index) =>
+      `      (let %${index} (${tag} (peek %0) (move %1)))`
+    );
+    expect(print(input)).toBe(
+      "\n(program\n" +
+        "  (function\n" +
+        "    (parameters)\n" +
+        "    (locals)\n" +
+        "    (result Int)\n" +
+        "    (block\n" +
+        expected_lines.join("\n") + "\n" +
+        "      (let %13 (negate (peek %2)))\n" +
+        "      (branch (constant 0) ^1 ^2)\n" +
+        "      (return %13))))\n",
+    );
+  });
+
+  it("prints jump instruction", () => {
+    const input: MIR.Program = [
+      "program",
+      [
+        "function",
+        ["parameters"],
+        ["locals"],
+        ["result", ["Int"]],
+        ["block", ["jump", "^42"]],
+      ],
+    ];
+
+    expect(print(input)).toBe(
+      "\n(program\n" +
+        "  (function\n" +
+        "    (parameters)\n" +
+        "    (locals)\n" +
+        "    (result Int)\n" +
+        "    (block\n" +
+        "      (jump ^42))))\n",
+    );
+  });
+});

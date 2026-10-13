@@ -1,0 +1,166 @@
+// Copyright (c) 2026 Marco Nikander
+
+import * as MIR from "./new_grammar.ts";
+import type { Type } from "../middle/types.ts";
+
+export function print(program: MIR.Program): string {
+  return `\n${print_program(program)}\n`;
+}
+
+function print_program([, ...functions]: MIR.Program): string {
+  if (functions.length === 0) return "(program)";
+  return `(program\n${
+    functions.map((fun) => indent(print_function(fun))).join("\n")
+  })`;
+}
+
+function print_function(
+  [, parameters, locals, result, ...blocks]: MIR.Function,
+): string {
+  return [
+    "(function",
+    indent(print_parameters(parameters)),
+    indent(print_locals(locals)),
+    indent(print_result(result)),
+    ...blocks.map((block) => indent(print_block(block))),
+  ].join("\n") + ")";
+}
+
+function print_parameters([, ...types]: MIR.Parameters): string {
+  return print_list("parameters", types.map(print_type));
+}
+
+function print_result([, type]: MIR.Result): string {
+  return `(result ${print_type(type)})`;
+}
+
+function print_locals([, ...types]: MIR.Locals): string {
+  return print_list("locals", types.map(print_type));
+}
+
+function print_block([, ...lines]: MIR.Block): string {
+  if (lines.length === 0) return "(block)";
+  return `(block\n${lines.map((line) => indent(print_line(line))).join("\n")})`;
+}
+
+function print_line(line: MIR.Line): string {
+  switch (line[0]) {
+    case "let":
+      return print_let(line);
+    case "drop":
+      return print_list("drop", [line[1]]);
+    case "return":
+      return print_list("return", [line[1]]);
+    case "branch":
+      return print_list("branch", [
+        print_input(line[1]),
+        line[2],
+        line[3],
+      ]);
+    case "jump":
+      return print_list("jump", [line[1]]);
+    default:
+      return assert_never(line);
+  }
+}
+
+function print_value(value: MIR.Operation): string {
+  switch (value[0]) {
+    case "phi":
+      return print_list("phi", [print_sources(value[1])]);
+    case "call":
+      return print_list("call", [
+        value[1],
+        print_arguments(value[2]),
+      ]);
+    case "identity":
+    case "borrow":
+    case "load":
+      return print_list(value[0], [print_input(value[1])]);
+    case "add":
+    case "subtract":
+    case "multiply":
+    case "divide":
+    case "remainder":
+    case "minimum":
+    case "maximum":
+    case "equal":
+    case "unequal":
+    case "less":
+    case "less_equal":
+    case "greater":
+    case "greater_equal":
+      return print_list(value[0], [
+        print_input(value[1]),
+        print_input(value[2]),
+      ]);
+    case "negate":
+      return print_list("negate", [print_input(value[1])]);
+    default:
+      return assert_never(value);
+  }
+}
+
+function print_arguments([, ...arguments_]: MIR.Arguments): string {
+  return print_list("arguments", arguments_.map(print_input));
+}
+
+function print_sources([, ...sources]: MIR.Sources): string {
+  return print_list("sources", sources.map(print_source));
+}
+
+function print_source([, block, register]: MIR.From): string {
+  return print_list("from", [block, print_input(register)]);
+}
+
+function print_input(input: MIR.Peek | MIR.Move | MIR.Constant): string {
+  switch (input[0]) {
+    case "peek":
+      return print_access(input);
+    case "move":
+      return print_consume(input);
+    case "constant":
+      return print_literal(input);
+    default:
+      return assert_never(input);
+  }
+}
+
+function print_let([, resource, value]: MIR.Let): string {
+  return print_list("let", [resource, print_value(value)]);
+}
+
+function print_access([, resource]: MIR.Peek): string {
+  return `(peek ${resource})`;
+}
+
+function print_consume([, resource]: MIR.Move): string {
+  return `(move ${resource})`;
+}
+
+function print_literal([, value]: MIR.Constant): string {
+  return `(constant ${value})`;
+}
+
+function print_type(type: Type): string {
+  switch (type[0]) {
+    case "Int":
+      return "Int";
+    case "Borrowed":
+      return `(Borrowed ${print_type(type[1])})`;
+    default:
+      return assert_never(type);
+  }
+}
+
+function print_list(tag: string, values: string[]): string {
+  return values.length === 0 ? `(${tag})` : `(${tag} ${values.join(" ")})`;
+}
+
+function indent(text: string): string {
+  return text.split("\n").map((line) => `  ${line}`).join("\n");
+}
+
+function assert_never(value: never): never {
+  throw new Error(`Unhandled MIR variant: ${JSON.stringify(value)}`);
+}
