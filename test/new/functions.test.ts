@@ -65,7 +65,7 @@ describe("MIR: function call", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(13);
+    expect(evaluate(lower(input))).toBe(13);
   });
 
   it("must support calling a binary function", () => {
@@ -130,7 +130,7 @@ describe("MIR: function call", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11);
+    expect(evaluate(lower(input))).toBe(11);
   });
 
   it("must evaluate tail-recursive functions", () => {
@@ -244,6 +244,6 @@ describe("MIR: function call", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(120);
+    expect(evaluate(lower(input))).toBe(120);
   });
 });

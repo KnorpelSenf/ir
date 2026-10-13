@@ -66,7 +66,7 @@ describe("MIR: jump", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(13);
+    expect(evaluate(lower(input))).toBe(13);
   });
 });
 
@@ -136,7 +136,7 @@ describe("MIR: branch", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11);
+    expect(evaluate(lower(input))).toBe(11);
   });
 
   it("must execute second branch if the condition is false", () => {
@@ -204,7 +204,7 @@ describe("MIR: branch", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(13);
+    expect(evaluate(lower(input))).toBe(13);
   });
 
   it("must perform computations inside of branches", () => {
@@ -290,7 +290,7 @@ describe("MIR: branch", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(13 + 281);
+    expect(evaluate(lower(input))).toBe(13 + 281);
   });
 
   it("must throw an error when condition is not a boolean", () => {
@@ -358,7 +358,7 @@ describe("MIR: branch", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow();
+    expect(() => evaluate(lower(input))).toThrow();
   });
 });
 
@@ -434,7 +434,7 @@ describe("MIR: block parameters (control flow join)", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(13);
+    expect(evaluate(lower(input))).toBe(13);
   });
 
   it("block bindings must assign from the correct register when executing a loop", () => {
@@ -518,7 +518,7 @@ describe("MIR: block parameters (control flow join)", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(3);
+    expect(evaluate(lower(input))).toBe(3);
   });
 
   it("block bindings must allow assignment from dominator blocks which are not the immediate dominator", () => {
@@ -635,7 +635,7 @@ describe("MIR: block parameters (control flow join)", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(13 + 281);
+    expect(evaluate(lower(input))).toBe(13 + 281);
   });
 
   it("block bindings must allow assignment when both inputs are available", () => {
@@ -726,7 +726,7 @@ describe("MIR: block parameters (control flow join)", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(13);
+    expect(evaluate(lower(input))).toBe(13);
   });
 
   it("must allow assignment when three inputs are available", () => {
@@ -822,7 +822,7 @@ describe("MIR: block parameters (control flow join)", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(0);
+    expect(evaluate(lower(input))).toBe(0);
   });
 
   it("must throw when a block argument is missing", () => {
@@ -918,6 +918,6 @@ describe("MIR: block parameters (control flow join)", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
+    expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
   });
 });

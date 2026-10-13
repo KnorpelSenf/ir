@@ -39,7 +39,7 @@ describe("MIR: literals and exit", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11);
+    expect(evaluate(lower(input))).toBe(11);
   });
 
   it("must throw an error when re-assigning a resource", () => {
@@ -77,7 +77,7 @@ describe("MIR: literals and exit", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => {
+    expect(() => {
     //   evaluate(lower(input));
     // }).toThrow();
   });
@@ -101,7 +101,7 @@ describe("MIR: literals and exit", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow();
+    expect(() => evaluate(lower(input))).toThrow();
   });
 
   it("must throw an error when exiting with a pointer instead of a Value", () => {
@@ -139,7 +139,7 @@ describe("MIR: literals and exit", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow();
+    expect(() => evaluate(lower(input))).toThrow();
   });
 });
 
@@ -179,7 +179,7 @@ describe("MIR: copying of registers", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11);
+    expect(evaluate(lower(input))).toBe(11);
   });
 });
 
@@ -219,7 +219,7 @@ describe("MIR: moving of registers", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11);
+    expect(evaluate(lower(input))).toBe(11);
   });
 
   it("must allow consuming an Add operand", () => {
@@ -259,7 +259,7 @@ describe("MIR: moving of registers", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11 + 13);
+    expect(evaluate(lower(input))).toBe(11 + 13);
   });
 
   it.skip("must allow consuming a block argument", () => {
@@ -305,7 +305,7 @@ describe("MIR: arithmetic operations", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11 + 13);
+    expect(evaluate(lower(input))).toBe(11 + 13);
   });
 
   it("must evaluate integer addition with a constant", () => {
@@ -343,6 +343,6 @@ describe("MIR: arithmetic operations", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11 + 13);
+    expect(evaluate(lower(input))).toBe(11 + 13);
   });
 });

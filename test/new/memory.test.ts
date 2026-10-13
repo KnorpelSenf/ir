@@ -43,7 +43,7 @@ describe("MIR: pointers", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(11);
+    expect(evaluate(lower(input))).toBe(11);
   });
 
   it.skip("must support pointers as block arguments", () => {
@@ -145,7 +145,7 @@ describe("MIR: pointers", () => {
 
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(evaluate(lower(input))).toBe(1);
+    expect(evaluate(lower(input))).toBe(1);
   });
 });
 
@@ -185,7 +185,7 @@ describe.skip("MIR: use-after-free", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
+    expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
   });
 
   it("must detect a use-after-free in an arithmetic expression", () => {
@@ -225,7 +225,7 @@ describe.skip("MIR: use-after-free", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
+    expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
   });
 
   it("must detect a double-free", () => {
@@ -267,7 +267,7 @@ describe.skip("MIR: use-after-free", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
+    expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
   });
 
   it("must detect a use-after-move", () => {
@@ -305,7 +305,7 @@ describe.skip("MIR: use-after-free", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
+    expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
   });
 
   it("must detect a dangling pointer when the source register is dropped", () => {
@@ -347,7 +347,7 @@ describe.skip("MIR: use-after-free", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
+    expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
   });
 
   it("must detect a dangling pointer when the source register is moved", () => {
@@ -389,6 +389,6 @@ describe.skip("MIR: use-after-free", () => {
     ];
     expect(input).toBeDefined();
     expect(print(input)).toEqual(text);
-    // expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
+    expect(() => evaluate(lower(input))).toThrow(); // runtime must flag this as an error
   });
 });
