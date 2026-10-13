@@ -2,9 +2,12 @@
 
 - Any change that affects structure, modules, or responsibilities must update
   README.md in the same commit.
+- The doc/instructions.md is a concise tabular overview of the available
+  instructions. It should not contain any lengthy explanations.
 - Any change that affects the middle (MIR) grammar's instruction set, type
   signatures, or printed surface syntax must update doc/instructions.md in the
-  same commit.
+  same commit. Changes to instructions.md, if any, should be the minimum needed
+  to stay consistent with the grammar and codebase.
 - Files which are completely AI-generated use the `*.gen.ts` or `*.gen.test.ts`
   suffix.
 
