@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Marco Nikander
 
-import * as MIR from "../middle/middle_grammar.ts";
+import * as MIR from "../new/new_grammar.ts";
 import * as LIR from "../low/low_grammar.ts";
 
 export type IndexedProgram = readonly IndexedFunction[];
@@ -12,12 +12,9 @@ export type IndexedFunction = {
 };
 export type IndexedBlock = {
   id: number;
+  bindings: MIR.ResourceId[];
   lines: MIR.Line[];
-  edge?: { target: number; predecessor: number };
 };
-
-export type SplitProgram = IndexedProgram;
-export type LoweredPhiProgram = IndexedProgram;
 
 export type BlockTarget = { function_id: number; block_id: number };
 export type FunctionTarget = { function_id: number };

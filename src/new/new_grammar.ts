@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Marco Nikander
 
-// New version of a middle intermediate representation (MIR) which features MLIR-style block parameters instead of phi-nodes.
+// A middle intermediate representation (MIR) with MLIR-inspired block parameters.
 
 import { Type } from "./types.ts";
 export type { Type } from "./types.ts";

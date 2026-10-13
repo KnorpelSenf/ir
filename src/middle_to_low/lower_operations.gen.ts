@@ -1,63 +1,83 @@
 // Copyright (c) 2026 Marco Nikander
 
-import * as MIR from "../middle/middle_grammar.ts";
+import * as MIR from "../new/new_grammar.ts";
 import * as LIR from "../low/low_grammar.ts";
 import type {
-  LoweredPhiProgram,
+  BlockTarget,
+  IndexedBlock,
+  IndexedProgram,
   UnresolvedInstruction,
   UnresolvedProgram,
 } from "./types.gen.ts";
 
 export function lower_operations(
-  program: LoweredPhiProgram,
+  program: IndexedProgram,
 ): UnresolvedProgram {
   const output: UnresolvedInstruction[] = [];
   for (const func of program) {
     let next_temporary = func.resource_count;
+    const context: Context = {
+      function_id: func.id,
+      blocks: func.blocks,
+      next_block: func.blocks.length,
+      edges: [],
+    };
     output.push([null, "noop", `fun ${func.id} [${func.parameter_count}]`]);
     for (const block of func.blocks) {
       output.push([null, "noop", `block ${block.id}`]);
       for (const line of block.lines) {
-        const lowered = lower_line(line, func.id, next_temporary);
+        const lowered = lower_line(line, context, next_temporary);
         output.push(...lowered.instructions);
         next_temporary = lowered.next_temporary;
       }
     }
+    output.push(...context.edges);
   }
   return output;
 }
 
+type Context = {
+  function_id: number;
+  blocks: IndexedBlock[];
+  next_block: number;
+  edges: UnresolvedInstruction[];
+};
+
 type Result = { instructions: UnresolvedInstruction[]; next_temporary: number };
 
-function lower_line(line: MIR.Line, function_id: number, next: number): Result {
+function lower_line(line: MIR.Line, context: Context, next: number): Result {
   if (line[0] === "drop") {
     return {
       instructions: [[MIR.to_index(line[1]), "drop"]],
       next_temporary: next,
     };
   }
-  if (line[0] === "jump") {
-    return {
-      instructions: [[null, "jump", {
-        function_id,
-        block_id: MIR.to_index(line[1]),
-      }]],
-      next_temporary: next,
-    };
-  }
+  if (line[0] === "jump") return lower_transfer(line[1], context, next);
   if (line[0] === "branch") {
-    const prepared = prepare_operands([line[1]], next, true);
+    const prepared = prepare_operands([line[1]], next, "moves");
+    next = prepared.next;
+    const targets = [line[2], line[3]].map((target): BlockTarget => {
+      const block_id = MIR.to_index(target[1]);
+      if (target[2].length === 1) {
+        return { function_id: context.function_id, block_id };
+      }
+      const edge_id = context.next_block++;
+      const lowered = lower_transfer(target, context, next);
+      next = lowered.next_temporary;
+      context.edges.push(
+        [null, "noop", `block ${edge_id}`],
+        ...lowered.instructions,
+      );
+      return { function_id: context.function_id, block_id: edge_id };
+    });
     return {
       instructions: [...prepared.before, ...prepared.after, [
         null,
         "branch",
         prepared.offsets[0],
-        [
-          { function_id, block_id: MIR.to_index(line[2]) },
-          { function_id, block_id: MIR.to_index(line[3]) },
-        ],
+        [targets[0], targets[1]],
       ]],
-      next_temporary: prepared.next,
+      next_temporary: next,
     };
   }
   if (line[0] === "return") {
@@ -69,10 +89,39 @@ function lower_line(line: MIR.Line, function_id: number, next: number): Result {
   return lower_let(line, next);
 }
 
+function lower_transfer(
+  target: MIR.Target,
+  context: Context,
+  next: number,
+): Result {
+  const block_id = MIR.to_index(target[1]);
+  const bindings = context.blocks[block_id].bindings;
+  // Snapshot the chosen edge before consuming sources or writing bindings.
+  const prepared = prepare_operands(
+    target[2].slice(1) as MIR.Operand[],
+    next,
+    "all",
+  );
+  const writes: UnresolvedInstruction[] = bindings.map((
+    binding,
+    index,
+  ) => [MIR.to_index(binding), "copy", prepared.offsets[index]]);
+  return {
+    instructions: [...prepared.before, ...prepared.after, ...writes, [
+      null,
+      "jump",
+      {
+        function_id: context.function_id,
+        block_id,
+      },
+    ]],
+    next_temporary: prepared.next,
+  };
+}
+
 function lower_let(line: MIR.Let, next: number): Result {
   const destination = MIR.to_index(line[1]);
   const op = line[2];
-  if (op[0] === "phi") throw Error("Phi operation reached operation lowering");
   if (op[0] === "call") {
     const prepared = prepare_operands(op[2].slice(1) as MIR.Operand[], next);
     return {
@@ -132,7 +181,7 @@ function lower_let(line: MIR.Let, next: number): Result {
 function prepare_operands(
   operands: MIR.Operand[],
   next: number,
-  preserve_consumed = false,
+  capture?: "moves" | "all",
 ): {
   before: UnresolvedInstruction[];
   offsets: number[];
@@ -147,14 +196,14 @@ function prepare_operands(
       before.push([temporary, "constant", { value: operand[1] }]);
       return temporary;
     }
-    if (operand[0] === "move" && preserve_consumed) {
+    const source = MIR.to_index(operand[1]);
+    if (operand[0] === "move") after.push([source, "drop"]);
+    if (capture === "all" || (capture === "moves" && operand[0] === "move")) {
       const temporary = next++;
-      before.push([temporary, "copy", MIR.to_index(operand[1])]);
-      after.push([MIR.to_index(operand[1]), "drop"]);
+      before.push([temporary, "copy", source]);
       return temporary;
     }
-    if (operand[0] === "move") after.push([MIR.to_index(operand[1]), "drop"]);
-    return MIR.to_index(operand[1]);
+    return source;
   });
   return { before, offsets, after, next };
 }

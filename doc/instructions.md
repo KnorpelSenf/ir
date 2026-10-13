@@ -1,6 +1,7 @@
 # MIR Instructions and Type Signatures
 
-MIR uses tagged symbolic expressions.
+MIR uses tagged symbolic expressions defined in
+[new_grammar.ts](../src/new/new_grammar.ts).
 Resources (i.e. variables) are identified by `%` followed by their zero-based
 position in their respective function.
 Functions are identified by `@` followed by their zero-based position in the
@@ -28,7 +29,7 @@ A complete function has the following structure:
 | `drop`   | `(drop %0)`                                | `Resource`                  | Destroy resource %0                                                    |
 | `jump`   | `(jump (target ^1 (arguments (peek %0))))` | `Target`                    | Unconditional branch to block #1, passing resource %0                  |
 | `branch` | `(branch (peek %0) (target ^1 (arguments (constant 42))) (target ^2 (arguments)))` | `Boolean, Target, Target` | Branch to block #1 with argument 42 when true, else block #2 with no arguments |
-| `return` | `(return %0)`                              | `T`                         | Return the value of resource %0 from the function                      |
+| `return` | `(return %0)`                              | `Resource`                         | Return the value of resource %0 from the function                      |
 
 ## Value-Producing Operations
 
@@ -62,6 +63,7 @@ The `identity` operation allows duplicating / copying a Value.
 
 The resource's type is supplied by the function's `parameters` and `locals` lists.
 Operands can:
+
 1. access a Resource via `peek`
 2. access and destroy a Resource via `move`
 3. use a temporary/immediate value via `constant`

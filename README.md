@@ -1,11 +1,11 @@
 # Intermediate Representation
 
-An interpreter for an intermediate representation (IR). This IR inspired by
-WebAssembly, LLVM IR, and Rust MIR. Ii is based on 3-address code (3AC aka TAC).
-Like all IRs, it sits between high-level languages such as C or TypeScript on
-one end, and Assembly on the other end.
+An interpreter for an intermediate representation (IR). This IR is inspired by
+WebAssembly, LLVM IR, MLIR, and Rust MIR. It is based on 3-address code (3AC aka
+TAC). Like all IRs, it sits between high-level languages such as C or TypeScript
+on one end, and Assembly on the other end.
 
-This project contains middle ([MIR](src/middle/middle_grammar.ts)) and low
+This project contains middle ([MIR](src/new/new_grammar.ts)) and low
 ([LIR](src/low/low_grammar.ts)) intermediate representations. MIR is based on
 symbolic expressions, has type information, and is intended for program
 analysis. LIR is close to assembly and is used for execution on a virtual
@@ -14,10 +14,6 @@ analysis. LIR is close to assembly and is used for execution on a virtual
 Programs are constructed directly as tagged tuples in TypeScript and checked by
 the type checker. There is no parser. MIR has a pretty-printer for readable test
 fixtures and debugging.
-
-A block-parameter version of MIR is being introduced in
-[new_grammar.ts](src/new/new_grammar.ts). The executable lowering pipeline still
-uses the phi-based grammar in `src/middle/`.
 
 The MIR-to-LIR compilation pipeline is completely AI-generated, from
 human-defined interfaces and human-defined end-to-end tests. It uses a
@@ -93,10 +89,10 @@ function. They are illustrated by these examples:
 - `(let %0 (identity (constant 42)))` defines resource #0 with the value 42.
 - `(drop %0)` drops resource #0.
 - `(return %0)` returns resource #0 from the function.
-- `(jump (target ^1 (arguments)))` jumps to block #1 unconditionally and passes
+- `(jump (target ^1 (arguments)))` jumps to block #1 unconditionally without
   arguments.
 - `(branch (peek %0) (target ^1 (arguments)) (target ^2 (arguments)))` branches
-  conditionally and passes arguments.
+  conditionally without arguments.
 
 Every value-producing line takes the form of a let-binding. The general form is
 `(let RESOURCE OPERATION)`. For example:
@@ -104,8 +100,8 @@ Every value-producing line takes the form of a let-binding. The general form is
 - `(let %0 (identity (constant 42)))` loads the integer `42` into resource 0.
 - `(let %1 (add (peek %0) (move %2)))` adds two operands and binds the result to
   resource 1.
-- `(let %2 (call @1 (arguments (peek %0))))` calls function #1, pass resource #0
-  as an argument, and bind the result to resource #3.
+- `(let %2 (call @1 (arguments (peek %0))))` calls function #1, passes resource
+  #0 as an argument, and binds the result to resource #2.
 
 Operands are `(peek %N)` for non-consuming access, `(move %N)` for a destructive
 move, and `(constant N)` for an immediate integer. Block and function references
@@ -116,8 +112,21 @@ node. Incoming arguments bind to the listed resource IDs in order, like
 let-bindings evaluated before the first instruction. A function's first block
 binds its incoming function arguments; a function with two parameters starts
 with `(bindings %0 %1)`. The function's `parameters` and `locals` still declare
-the resource types. Control-flow joins use MLIR-inspired block bindings in place
-of phi operations: each predecessor passes its operands to the receiving block.
+the resource types. Entry bindings must use the canonical parameter IDs in
+order; other blocks can bind any declared resource IDs. Control-flow joins use
+MLIR-inspired block bindings: each predecessor passes its operands to the
+receiving block.
+
+All arguments on the chosen edge are captured before any destination binding is
+written. For example, passing `(peek %1) (peek %0)` to `(bindings %0 %1)` swaps
+the two values. A branch evaluates its condition first and evaluates only the
+selected target's arguments. Each target must supply exactly as many arguments
+as its destination has bindings, and calls must match their function's parameter
+count.
+
+Each resource has one static definition, either a block binding or a `let`.
+Repeated execution of that definition in a loop is allowed; defining the same
+resource in two places is rejected.
 
 Each control-flow edge carries a `target` containing the destination block and
 its own `arguments` node. A branch can pass different arguments to each
@@ -197,24 +206,34 @@ Example of canonical formatting:
 
 ### Middle Intermediate Representation (MIR)
 
-| File / Directory                                  | Description                                                                                   |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| [middle_grammar.ts](src/middle/middle_grammar.ts) | Defines MIR programs, functions, blocks, instructions, operands, and tagged structural nodes. |
-| [types.ts](src/middle/types.ts)                   | Defines MIR value and ownership types.                                                        |
-| [print.gen.ts](src/middle/print.gen.ts)           | Pretty-prints MIR programs as canonical, indented symbolic expressions.                       |
+| File / Directory                         | Description                                                                                   |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| [new_grammar.ts](src/new/new_grammar.ts) | Defines MIR programs, functions, blocks, instructions, operands, and tagged structural nodes. |
+| [types.ts](src/new/types.ts)             | Defines MIR value and ownership types.                                                        |
+| [print.gen.ts](src/new/print.gen.ts)     | Pretty-prints MIR programs as canonical, indented symbolic expressions.                       |
 
 ### MIR-to-LIR Lowering (AI-generated)
 
-| File / Directory                                                         | Description                                                                             |
-| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| [lower.gen.ts](src/middle_to_low/lower.gen.ts)                           | The pipeline entry point. Runs micro-passes in order.                                   |
-| [validate_and_index.gen.ts](src/middle_to_low/validate_and_index.gen.ts) | 1. Validates references and indexes MIR functions and blocks.                           |
-| [split_phi_edges.gen.ts](src/middle_to_low/split_phi_edges.gen.ts)       | 2. Inserts edge blocks so every phi input has its own predecessor edge.                 |
-| [lower_phi_moves.gen.ts](src/middle_to_low/lower_phi_moves.gen.ts)       | 3. Replaces phi nodes with explicit transfers in the edge blocks.                       |
-| [lower_operations.gen.ts](src/middle_to_low/lower_operations.gen.ts)     | 4. Lowers MIR operations and operands into flat LIR instructions with symbolic targets. |
-| [resolve_targets.gen.ts](src/middle_to_low/resolve_targets.gen.ts)       | 5. Resolves function and block targets to concrete instruction addresses.               |
-| [mod.gen.ts](src/middle_to_low/mod.gen.ts)                               | Exports the individual passes.                                                          |
-| [types.gen.ts](src/middle_to_low/types.gen.ts)                           | Defines intermediate forms for passes.                                                  |
+The pipeline has three passes: validation and indexing, operation and argument
+lowering, and target resolution.
+
+| File / Directory                                                         | Description                                                                                  |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| [lower.gen.ts](src/middle_to_low/lower.gen.ts)                           | The pipeline entry point. Runs micro-passes in order.                                        |
+| [validate_and_index.gen.ts](src/middle_to_low/validate_and_index.gen.ts) | 1. Validates references, definitions, and argument counts; indexes functions and blocks.     |
+| [lower_operations.gen.ts](src/middle_to_low/lower_operations.gen.ts)     | 2. Lowers operations, operands, and block argument transfers into LIR with symbolic targets. |
+| [resolve_targets.gen.ts](src/middle_to_low/resolve_targets.gen.ts)       | 3. Resolves function and block targets to concrete instruction addresses.                    |
+| [mod.gen.ts](src/middle_to_low/mod.gen.ts)                               | Exports the individual passes.                                                               |
+| [types.gen.ts](src/middle_to_low/types.gen.ts)                           | Defines intermediate forms for passes.                                                       |
+
+Notes:
+
+- Unconditional jumps transfer arguments inline.
+- Branch arms with arguments use separate generated LIR blocks so only the
+  chosen arm performs its transfers; arms without arguments jump directly.
+- Transfers capture inputs in temporary slots before writing bindings,
+  preserving cyclic assignments.
+- Temporary slots stay live across loop iterations.
 
 ### Low-Level IR and Runtime
 
@@ -229,11 +248,11 @@ Example of canonical formatting:
 
 | File / Directory                                            | Description                                                                |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [middle.test.ts](test/middle/middle.test.ts)                | End-to-end MIR tests for literals, exit, register copying, and arithmetic. |
-| [control_flow.test.ts](test/middle/control_flow.test.ts)    | End-to-end MIR tests for jumps, branches, and phi joins.                   |
-| [functions.test.ts](test/middle/functions.test.ts)          | End-to-end MIR tests for function calls.                                   |
-| [memory.test.ts](test/middle/memory.test.ts)                | End-to-end MIR tests for memory and ownership.                             |
-| [print.gen.test.ts](test/middle/print.gen.test.ts)          | MIR pretty-printer coverage.                                               |
+| [middle.test.ts](test/new/middle.test.ts)                   | End-to-end MIR tests for literals, exit, register copying, and arithmetic. |
+| [control_flow.test.ts](test/new/control_flow.test.ts)       | End-to-end MIR tests for jumps, branches, loops, and block bindings.       |
+| [functions.test.ts](test/new/functions.test.ts)             | End-to-end MIR tests for function calls.                                   |
+| [memory.test.ts](test/new/memory.test.ts)                   | End-to-end MIR tests for memory and ownership.                             |
+| [print.gen.test.ts](test/new/print.gen.test.ts)             | MIR pretty-printer coverage.                                               |
 | [passes.gen.test.ts](test/middle_to_low/passes.gen.test.ts) | MIR-to-LIR micro-pass tests.                                               |
 | [runtime.test.ts](test/low/runtime.test.ts)                 | Direct LIR runtime tests.                                                  |
 
