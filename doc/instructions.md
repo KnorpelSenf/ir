@@ -14,19 +14,21 @@ A complete function has the following structure:
   (locals Int (Borrowed Int))
   (result Int)
   (block
-    (let %0 (identity (constant 42)))
-    (return %0)))
+    (bindings %0)
+    (instructions
+      (let %1 (identity (constant 42)))
+      (return %1))))
 ```
 
 ## Instructions
 
-| Symbol   | Example                             | Parameters                  | Comment                                                                |
-| :------- | :---------------------------------- | :-------------------------- | :--------------------------------------------------------------------- |
-| `let`    | `(let %0 (identity (constant 42)))` | `Resource, Operation`       | Define resource %0 with the value 42                                   |
-| `drop`   | `(drop %0)`                         | `Resource`                  | Destroy resource %0                                                    |
-| `jump`   | `(jump ^1)`                         | `BlockId`                   | Unconditional branch to block #1                                       |
-| `branch` | `(branch (peek %0) ^1 ^2)`          | `Boolean, BlockId, BlockId` | Branch to block #1 when the condition is true, else branch to block #2 |
-| `return` | `(return %0)`                       | `T`                         | Return the value of resource %0 from the function                      |
+| Symbol   | Example                                    | Parameters                  | Comment                                                                |
+| :------- | :----------------------------------        | :-------------------------- | :--------------------------------------------------------------------- |
+| `let`    | `(let %0 (identity (constant 42)))`        | `Resource, Operation`       | Define resource %0 with the value 42                                   |
+| `drop`   | `(drop %0)`                                | `Resource`                  | Destroy resource %0                                                    |
+| `jump`   | `(jump (target ^1 (arguments (peek %0))))` | `Target`                    | Unconditional branch to block #1, passing resource %0                  |
+| `branch` | `(branch (peek %0) (target ^1 (arguments (constant 42))) (target ^2 (arguments)))` | `Boolean, Target, Target` | Branch to block #1 with argument 42 when true, else block #2 with no arguments |
+| `return` | `(return %0)`                              | `T`                         | Return the value of resource %0 from the function                      |
 
 ## Value-Producing Operations
 
@@ -37,7 +39,6 @@ The `identity` operation allows duplicating / copying a Value.
 
 | Symbol          | Example                                                            | Input              | Output        | Comment                                |
 | :-------------- | :----------------------------------------------------------------- | :----------------- | :------------ | :------------------------------------- |
-| `phi`           | `(let %0 (phi (sources (from ^1 (peek %2)) (from ^2 (move %3)))))` | `T...`             | `T`           | SSA-style join                         |
 | `call`          | `(let %0 (call @1 (arguments (peek %1) (move %2))))`               | `T...`             | `U`           | Function call                          |
 | `borrow`        | `(let %0 (borrow (peek %1)))`                                      | `T`                | `Borrowed T`  | Create a read-only, non-owning pointer |
 | `load`          | `(let %0 (load (peek %1)))`                                        | `Borrowed T`       | `T`           | Load the value referenced by a pointer |
