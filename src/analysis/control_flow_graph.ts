@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Marco Nikander
 
-import * as MIR from "../middle/middle_grammar.ts";
+import * as MIR from "../new/new_grammar.ts";
 
 export type Graph = Node[];
 
@@ -39,7 +39,7 @@ export function make_cfg(func: undefined | MIR.Function): Graph {
 }
 
 function extract_successors(block: MIR.Block): MIR.BlockId[] {
-  const [, ...lines] = block;
+  const [, , [, ...lines]] = block;
   if (lines.length <= 0) {
     return [];
   } else {
@@ -48,9 +48,9 @@ function extract_successors(block: MIR.Block): MIR.BlockId[] {
     if (line[0] === "return") {
       return [];
     } else if (line[0] === "branch") {
-      return [line[2], line[3]];
+      return [line[2][1], line[3][1]];
     } else if (line[0] === "jump") {
-      return [line[1]];
+      return [line[1][1]];
     } else {
       throw Error(
         `Expected terminator instruction. Cannot extract successor blocks from

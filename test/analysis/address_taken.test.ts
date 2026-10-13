@@ -1,8 +1,8 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import * as MIR from "../../src/middle/middle_grammar.ts";
+import * as MIR from "../../src/new/new_grammar.ts";
 import { address_taken } from "../../src/analysis/address_taken.ts";
-import { print } from "../../src/middle/print.gen.ts";
+import { print } from "../../src/new/print.gen.ts";
 
 describe("analysis: address taken", () => {
   it("must identify when no resource is borrowed in a block", () => {
@@ -13,9 +13,11 @@ describe("analysis: address taken", () => {
     (locals Int Int)
     (result Int)
     (block
-      (let %0 (identity (constant 0)))
-      (let %1 (identity (constant 1)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (let %1 (identity (constant 1)))
+        (return %1)))))
 `;
     const input: MIR.Program = ["program", [
       "function",
@@ -24,9 +26,13 @@ describe("analysis: address taken", () => {
       ["result", ["Int"]],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["let", "%1", ["identity", ["constant", 1]]],
-        ["return", "%1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 0]]],
+          ["let", "%1", ["identity", ["constant", 1]]],
+          ["return", "%1"],
+        ],
       ],
     ]];
 
@@ -45,10 +51,12 @@ describe("analysis: address taken", () => {
     (locals Int Int (Borrowed Int))
     (result Int)
     (block
-      (let %0 (identity (constant 0)))
-      (let %1 (identity (constant 1)))
-      (let %2 (borrow (peek %1)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (let %1 (identity (constant 1)))
+        (let %2 (borrow (peek %1)))
+        (return %1)))))
 `;
     const input: MIR.Program = ["program", [
       "function",
@@ -57,10 +65,14 @@ describe("analysis: address taken", () => {
       ["result", ["Int"]],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["let", "%1", ["identity", ["constant", 1]]],
-        ["let", "%2", ["borrow", ["peek", "%1"]]],
-        ["return", "%1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 0]]],
+          ["let", "%1", ["identity", ["constant", 1]]],
+          ["let", "%2", ["borrow", ["peek", "%1"]]],
+          ["return", "%1"],
+        ],
       ],
     ]];
 
@@ -80,15 +92,19 @@ describe("analysis: address taken", () => {
     (locals Int Int (Borrowed Int) Int Int (Borrowed Int))
     (result Int)
     (block
-      (let %0 (identity (constant 0)))
-      (let %1 (identity (constant 1)))
-      (let %2 (borrow (peek %0)))
-      (jump ^1))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (let %1 (identity (constant 1)))
+        (let %2 (borrow (peek %0)))
+        (jump (target ^1 (arguments)))))
     (block
-      (let %3 (identity (constant 3)))
-      (let %4 (identity (constant 4)))
-      (let %5 (borrow (peek %4)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %3 (identity (constant 3)))
+        (let %4 (identity (constant 4)))
+        (let %5 (borrow (peek %4)))
+        (return %1)))))
 `;
     const input: MIR.Program = ["program", [
       "function",
@@ -105,17 +121,25 @@ describe("analysis: address taken", () => {
       ["result", ["Int"]],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["let", "%1", ["identity", ["constant", 1]]],
-        ["let", "%2", ["borrow", ["peek", "%0"]]],
-        ["jump", "^1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 0]]],
+          ["let", "%1", ["identity", ["constant", 1]]],
+          ["let", "%2", ["borrow", ["peek", "%0"]]],
+          ["jump", ["target", "^1", ["arguments"]]],
+        ],
       ],
       [
         "block",
-        ["let", "%3", ["identity", ["constant", 3]]],
-        ["let", "%4", ["identity", ["constant", 4]]],
-        ["let", "%5", ["borrow", ["peek", "%4"]]],
-        ["return", "%1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%3", ["identity", ["constant", 3]]],
+          ["let", "%4", ["identity", ["constant", 4]]],
+          ["let", "%5", ["borrow", ["peek", "%4"]]],
+          ["return", "%1"],
+        ],
       ],
     ]];
 

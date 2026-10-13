@@ -1,6 +1,6 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import * as MIR from "../../src/middle/middle_grammar.ts";
+import * as MIR from "../../src/new/new_grammar.ts";
 import { Graph, make_cfg } from "../../src/analysis/control_flow_graph.ts";
 
 describe("must compute control flow graphs for programs with one function", () => {
@@ -8,6 +8,61 @@ describe("must compute control flow graphs for programs with one function", () =
     const program: MIR.Program = ["program"];
     const expected: Graph = [];
 
+    expect(make_cfg(program[1])).toEqual(expected);
+  });
+
+  it("with an empty instructions node", () => {
+    const program: MIR.Program = ["program", [
+      "function",
+      ["parameters", ["Int"]],
+      ["locals"],
+      ["result", ["Int"]],
+      ["block", ["bindings", "%0"], ["instructions"]],
+    ]];
+
+    const expected: Graph = [
+      { pred: [], succ: [] },
+    ];
+    expect(make_cfg(program[1])).toEqual(expected);
+  });
+
+  it("must reject a non-terminating final instruction", () => {
+    const program: MIR.Program = ["program", [
+      "function",
+      ["parameters"],
+      ["locals", ["Int"]],
+      ["result", ["Int"]],
+      ["block", ["bindings"], [
+        "instructions",
+        ["let", "%0", ["identity", ["constant", 11]]],
+      ]],
+    ]];
+
+    expect(() => make_cfg(program[1])).toThrow();
+  });
+
+  it("must preserve duplicate branch edges with different arguments", () => {
+    const program: MIR.Program = ["program", [
+      "function",
+      ["parameters"],
+      ["locals", ["Int"]],
+      ["result", ["Int"]],
+      ["block", ["bindings"], [
+        "instructions",
+        [
+          "branch",
+          ["constant", 1],
+          ["target", "^1", ["arguments", ["constant", 11]]],
+          ["target", "^1", ["arguments", ["constant", 13]]],
+        ],
+      ]],
+      ["block", ["bindings", "%0"], ["instructions", ["return", "%0"]]],
+    ]];
+
+    const expected: Graph = [
+      { pred: [], succ: ["^1", "^1"] },
+      { pred: ["^0", "^0"], succ: [] },
+    ];
     expect(make_cfg(program[1])).toEqual(expected);
   });
 
@@ -19,8 +74,12 @@ describe("must compute control flow graphs for programs with one function", () =
       ["result", ["Int"]],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["return", "%0"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 11]]],
+          ["return", "%0"],
+        ],
       ],
     ]];
 
@@ -37,12 +96,20 @@ describe("must compute control flow graphs for programs with one function", () =
       ["result", ["Int"]],
       [
         "block",
-        ["jump", "^1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["jump", ["target", "^1", ["arguments"]]],
+        ],
       ],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["return", "%0"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 11]]],
+          ["return", "%0"],
+        ],
       ],
     ]];
     const expected: Graph = [
@@ -61,27 +128,43 @@ describe("must compute control flow graphs for programs with one function", () =
       ["result", ["Int"]],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 10]]],
-        ["branch", ["constant", 0], "^1", "^2"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 10]]],
+          [
+            "branch",
+            ["constant", 0],
+            ["target", "^1", ["arguments"]],
+            ["target", "^2", ["arguments"]],
+          ],
+        ],
       ],
       [
         "block",
-        ["let", "%1", ["add", ["peek", "%0"], ["constant", 1]]],
-        ["jump", "^3"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%1", ["add", ["peek", "%0"], ["constant", 1]]],
+          ["jump", ["target", "^3", ["arguments", ["peek", "%1"]]]],
+        ],
       ],
       [
         "block",
-        ["let", "%2", ["add", ["peek", "%0"], ["constant", 2]]],
-        ["jump", "^3"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%2", ["add", ["peek", "%0"], ["constant", 2]]],
+          ["jump", ["target", "^3", ["arguments", ["peek", "%2"]]]],
+        ],
       ],
       [
         "block",
-        ["let", "%3", ["phi", [
-          "sources",
-          ["from", "^1", ["peek", "%1"]],
-          ["from", "^2", ["peek", "%2"]],
-        ]]],
-        ["return", "%3"],
+        ["bindings", "%3"],
+        [
+          "instructions",
+          ["return", "%3"],
+        ],
       ],
     ]];
 
@@ -103,17 +186,34 @@ describe("must compute control flow graphs for programs with one function", () =
       ["result", ["Int"]],
       [
         "block",
-        ["branch", ["constant", 0], "^1", "^2"],
+        ["bindings"],
+        [
+          "instructions",
+          [
+            "branch",
+            ["constant", 0],
+            ["target", "^1", ["arguments"]],
+            ["target", "^2", ["arguments"]],
+          ],
+        ],
       ],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 11]]],
-        ["return", "%0"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 11]]],
+          ["return", "%0"],
+        ],
       ],
       [
         "block",
-        ["let", "%1", ["identity", ["constant", 13]]],
-        ["return", "%1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%1", ["identity", ["constant", 13]]],
+          ["return", "%1"],
+        ],
       ],
     ]];
     const expected: Graph = [
@@ -129,27 +229,39 @@ describe("must compute control flow graphs for programs with one function", () =
     const program: MIR.Program = ["program", [
       "function",
       ["parameters"],
-      ["locals", ["Int"], ["Int"], ["Int"]],
+      ["locals", ["Int"], ["Int"], ["Int"], ["Int"]],
       ["result", ["Int"]],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["jump", "^1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 0]]],
+          ["jump", ["target", "^1", ["arguments", ["peek", "%0"]]]],
+        ],
       ],
       [
         "block",
-        ["let", "%1", ["phi", [
-          "sources",
-          ["from", "^0", ["peek", "%0"]],
-          ["from", "^1", ["peek", "%2"]],
-        ]]],
-        ["let", "%2", ["add", ["peek", "%1"], ["constant", 1]]], // %2 = %1 + 1
-        ["let", "%3", ["less", ["peek", "%2"], ["constant", 5]]], // %3 = %2 < 5
-        ["branch", ["peek", "%3"], "^1", "^2"],
+        ["bindings", "%1"],
+        [
+          "instructions",
+          ["let", "%2", ["add", ["peek", "%1"], ["constant", 1]]], // %2 = %1 + 1
+          ["let", "%3", ["less", ["peek", "%2"], ["constant", 5]]], // %3 = %2 < 5
+          [
+            "branch",
+            ["peek", "%3"],
+            ["target", "^1", ["arguments", ["peek", "%2"]]],
+            ["target", "^2", ["arguments"]],
+          ],
+        ],
       ],
       [
         "block",
-        ["return", "%1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["return", "%1"],
+        ],
       ],
     ]];
 

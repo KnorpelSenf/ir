@@ -1,7 +1,7 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import * as MIR from "../../src/middle/middle_grammar.ts";
-import { print } from "../../src/middle/print.gen.ts";
+import * as MIR from "../../src/new/new_grammar.ts";
+import { print } from "../../src/new/print.gen.ts";
 import { may_return_pointer } from "../../src/analysis/pointer_return.ts";
 
 describe("analysis: pointer return", () => {
@@ -13,9 +13,11 @@ describe("analysis: pointer return", () => {
     (locals Int (Borrowed Int))
     (result Int)
     (block
-      (let %0 (identity (constant 0)))
-      (let %1 (borrow (peek %0)))
-      (return %0))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (let %1 (borrow (peek %0)))
+        (return %0)))))
 `;
     const input: MIR.Program = ["program", [
       "function",
@@ -24,9 +26,13 @@ describe("analysis: pointer return", () => {
       ["result", ["Int"]],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["let", "%1", ["borrow", ["peek", "%0"]]],
-        ["return", "%0"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 0]]],
+          ["let", "%1", ["borrow", ["peek", "%0"]]],
+          ["return", "%0"],
+        ],
       ],
     ]];
 
@@ -43,9 +49,11 @@ describe("analysis: pointer return", () => {
     (locals Int (Borrowed Int))
     (result (Borrowed Int))
     (block
-      (let %0 (identity (constant 0)))
-      (let %1 (borrow (peek %0)))
-      (return %1))))
+      (bindings)
+      (instructions
+        (let %0 (identity (constant 0)))
+        (let %1 (borrow (peek %0)))
+        (return %1)))))
 `;
     const input: MIR.Program = ["program", [
       "function",
@@ -54,9 +62,13 @@ describe("analysis: pointer return", () => {
       ["result", ["Borrowed", ["Int"]]],
       [
         "block",
-        ["let", "%0", ["identity", ["constant", 0]]],
-        ["let", "%1", ["borrow", ["peek", "%0"]]],
-        ["return", "%1"],
+        ["bindings"],
+        [
+          "instructions",
+          ["let", "%0", ["identity", ["constant", 0]]],
+          ["let", "%1", ["borrow", ["peek", "%0"]]],
+          ["return", "%1"],
+        ],
       ],
     ]];
 
