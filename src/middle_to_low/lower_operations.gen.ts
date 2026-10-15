@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Marco Nikander
 
-import * as MIR from "../new/new_grammar.ts";
+import * as MIR from "../middle/middle_grammar.ts";
 import * as LIR from "../low/low_grammar.ts";
 import type {
   BlockTarget,

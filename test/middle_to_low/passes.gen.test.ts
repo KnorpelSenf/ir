@@ -2,7 +2,7 @@
 
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import * as MIR from "../../src/new/new_grammar.ts";
+import * as MIR from "../../src/middle/middle_grammar.ts";
 import { evaluate } from "../../src/low/machine.ts";
 import { lower } from "../../src/middle_to_low/lower.gen.ts";
 import {

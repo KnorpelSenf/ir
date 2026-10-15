@@ -1,7 +1,7 @@
 # MIR Instructions and Type Signatures
 
 MIR uses tagged symbolic expressions defined in
-[new_grammar.ts](../src/new/new_grammar.ts).
+[middle_grammar.ts](../src/middle/middle_grammar.ts).
 Resources (i.e. variables) are identified by `%` followed by their zero-based
 position in their respective function.
 Functions are identified by `@` followed by their zero-based position in the

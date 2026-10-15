@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Marco Nikander
 
-import * as MIR from "./new_grammar.ts";
+import * as MIR from "./middle_grammar.ts";
 import type { Type } from "./types.ts";
 
 export function print(program: MIR.Program): string {

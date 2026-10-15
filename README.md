@@ -5,7 +5,7 @@ WebAssembly, LLVM IR, MLIR, and Rust MIR. It is based on 3-address code (3AC aka
 TAC). Like all IRs, it sits between high-level languages such as C or TypeScript
 on one end, and Assembly on the other end.
 
-This project contains middle ([MIR](src/new/new_grammar.ts)) and low
+This project contains middle ([MIR](src/middle/middle_grammar.ts)) and low
 ([LIR](src/low/low_grammar.ts)) intermediate representations. MIR is based on
 symbolic expressions, has type information, and is intended for program
 analysis. LIR is close to assembly and is used for execution on a virtual
@@ -43,7 +43,7 @@ Currently, there is no command-line interface, only tests.
 ## MIR Syntax
 
 An MIR program is an array of functions, with `@0` as its entry point. In the
-[block-parameter grammar](src/new/new_grammar.ts), numeric IDs identify
+[block-parameter grammar](src/middle/middle_grammar.ts), numeric IDs identify
 resources (`%N`), functions (`@N`), and blocks (`^N`) by their zero-based
 positions. Function IDs are program-wide; block and resource IDs are local to a
 function. Resources are stack-frame slots, numbered with parameters first, then
@@ -141,11 +141,11 @@ trailing newline.
 
 ### Middle Intermediate Representation (MIR)
 
-| File / Directory                         | Description                                                                                   |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------- |
-| [new_grammar.ts](src/new/new_grammar.ts) | Defines MIR programs, functions, blocks, instructions, operands, and tagged structural nodes. |
-| [types.ts](src/new/types.ts)             | Defines MIR value and ownership types.                                                        |
-| [print.gen.ts](src/new/print.gen.ts)     | Pretty-prints MIR programs as canonical, indented symbolic expressions.                       |
+| File / Directory                                  | Description                                                                                   |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| [middle_grammar.ts](src/middle/middle_grammar.ts) | Defines MIR programs, functions, blocks, instructions, operands, and tagged structural nodes. |
+| [types.ts](src/middle/types.ts)                   | Defines MIR value and ownership types.                                                        |
+| [print.gen.ts](src/middle/print.gen.ts)           | Pretty-prints MIR programs as canonical, indented symbolic expressions.                       |
 
 ### MIR Analysis
 
@@ -189,18 +189,18 @@ Notes:
 
 ### Tests
 
-| File / Directory                                            | Description                                                                |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [middle.test.ts](test/new/middle.test.ts)                   | End-to-end MIR tests for literals, exit, register copying, and arithmetic. |
-| [control_flow.test.ts](test/new/control_flow.test.ts)       | End-to-end MIR tests for jumps, branches, loops, and block bindings.       |
-| [functions.test.ts](test/new/functions.test.ts)             | End-to-end MIR tests for function calls.                                   |
-| [memory.test.ts](test/new/memory.test.ts)                   | End-to-end MIR tests for memory and ownership.                             |
-| [print.gen.test.ts](test/new/print.gen.test.ts)             | MIR pretty-printer coverage.                                               |
-| [address_taken.test.ts](test/analysis/address_taken.test.ts) | Tests borrowed resource ID collection with literal MIR fixtures.          |
+| File / Directory                                                       | Description                                                                   |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [middle.test.ts](test/middle/middle.test.ts)                           | End-to-end MIR tests for literals, exit, register copying, and arithmetic.    |
+| [control_flow.test.ts](test/middle/control_flow.test.ts)               | End-to-end MIR tests for jumps, branches, loops, and block bindings.          |
+| [functions.test.ts](test/middle/functions.test.ts)                     | End-to-end MIR tests for function calls.                                      |
+| [memory.test.ts](test/middle/memory.test.ts)                           | End-to-end MIR tests for memory and ownership.                                |
+| [print.gen.test.ts](test/middle/print.gen.test.ts)                     | MIR pretty-printer coverage.                                                  |
+| [address_taken.test.ts](test/analysis/address_taken.test.ts)           | Tests borrowed resource ID collection with literal MIR fixtures.              |
 | [control_flow_graph.test.ts](test/analysis/control_flow_graph.test.ts) | Tests control-flow predecessor and successor lists with literal MIR fixtures. |
-| [pointer_return.test.ts](test/analysis/pointer_return.test.ts) | Tests pointer-return detection from declared MIR result types.             |
-| [passes.gen.test.ts](test/middle_to_low/passes.gen.test.ts) | MIR-to-LIR micro-pass tests.                                               |
-| [runtime.test.ts](test/low/runtime.test.ts)                 | Direct LIR runtime tests.                                                  |
+| [pointer_return.test.ts](test/analysis/pointer_return.test.ts)         | Tests pointer-return detection from declared MIR result types.                |
+| [passes.gen.test.ts](test/middle_to_low/passes.gen.test.ts)            | MIR-to-LIR micro-pass tests.                                                  |
+| [runtime.test.ts](test/low/runtime.test.ts)                            | Direct LIR runtime tests.                                                     |
 
 ### Other Repository Areas
 

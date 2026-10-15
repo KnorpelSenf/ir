@@ -1,8 +1,8 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import * as MIR from "../../src/new/new_grammar.ts";
+import * as MIR from "../../src/middle/middle_grammar.ts";
 import { address_taken } from "../../src/analysis/address_taken.ts";
-import { print } from "../../src/new/print.gen.ts";
+import { print } from "../../src/middle/print.gen.ts";
 
 describe("analysis: address taken", () => {
   it("must identify when no resource is borrowed in a block", () => {

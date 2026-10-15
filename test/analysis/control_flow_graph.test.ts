@@ -1,6 +1,6 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import * as MIR from "../../src/new/new_grammar.ts";
+import * as MIR from "../../src/middle/middle_grammar.ts";
 import { Graph, make_cfg } from "../../src/analysis/control_flow_graph.ts";
 
 describe("must compute control flow graphs for programs with one function", () => {

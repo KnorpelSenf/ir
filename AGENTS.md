@@ -14,8 +14,8 @@
 ## Suggested Workflow
 
 - For MIR syntax or semantics, start with
-  [new_grammar.ts](src/new/new_grammar.ts), then consult the MIR tests in
-  `test/new/` and `doc/`.
+  [middle_grammar.ts](src/middle/middle_grammar.ts), then consult the MIR tests
+  in `test/middle/` and `doc/`.
 - For lowering behavior, start with
   [lower.gen.ts](src/middle_to_low/lower.gen.ts), then inspect the micro-passes
   described in the readme.
@@ -25,7 +25,7 @@
 ## Commands
 
 - Run all tests: `deno test`
-- Run MIR end-to-end tests: `deno test test/new`
+- Run MIR end-to-end tests: `deno test test/middle`
 - Run MIR-to-LIR pass tests: `deno test test/middle_to_low`
 - Run direct runtime tests: `deno test test/low/runtime.test.ts`
 - Run linter: `deno lint`
