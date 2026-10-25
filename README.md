@@ -1,15 +1,22 @@
 # Intermediate Representation
 
-An interpreter for an intermediate representation (IR). This IR is inspired by
-WebAssembly, LLVM IR, MLIR, and Rust MIR. It is based on 3-address code (3AC aka
-TAC). Like all IRs, it sits between high-level languages such as C or TypeScript
-on one end, and Assembly on the other end.
+An interpreter for a memory-safe intermediate representation (IR). This IR is
+inspired by WebAssembly, LLVM IR, MLIR, and Rust MIR. It combines static
+single-assignment form, the single ownership principle, and integrates
+references directly into static single-assignment (SSA) form. The
+[**language concept paper**](doc/language_concept.md) explains the ideas behind
+the IR and its approach to memory-safety. A
+[primer on SSA](doc/intro_to_ssa_form.md) form is also available.
 
-This project contains middle ([MIR](src/middle/middle_grammar.ts)) and low
-([LIR](src/low/low_grammar.ts)) intermediate representations. MIR is based on
-symbolic expressions, has type information, and is intended for program
-analysis. LIR is close to assembly and is used for execution on a virtual
-[machine](src/low/machine.ts).
+The IR sits between high-level languages such as C or TypeScript on one end, and
+Assembly on the other end. It is based on 3-address code (3AC or TAC). This
+project contains middle ([MIR](src/middle/middle_grammar.ts)) and low
+([LIR](src/low/low_grammar.ts)) intermediate representations. MIR is the focus
+of the project. Its written in
+[symbolic expressions](https://en.wikipedia.org/wiki/S-expression), has type
+information, and is intended for program analysis. The static analysis of MIR is
+a work-in-progress. LIR is close to assembly and is used for execution on a
+virtual [machine](src/low/machine.ts).
 
 Programs are constructed directly as tagged tuples in TypeScript and checked by
 the type checker. There is no parser. MIR has a pretty-printer for readable test
@@ -21,10 +28,12 @@ micro-pass architecture inspired by the Chez Scheme compiler.
 
 ## More Information
 
-| File / Directory                         | Description                          |
-| ---------------------------------------- | ------------------------------------ |
-| [instructions.md](./doc/instructions.md) | Table of instructions and operations |
-| [decisions.md](./doc/decisions.md)       | Log of design decisions              |
+| File / Directory                                     | Description                          |
+| ---------------------------------------------------- | ------------------------------------ |
+| [instructions.md](./doc/instructions.md)             | Table of instructions and operations |
+| [decisions.md](./doc/decisions.md)                   | Log of design decisions              |
+| [intro_to_ssa_form.md](./doc/intro_to_ssa_form.md)   | Introduction to SSA form             |
+| [**language_concept.md**](./doc/language_concept.md) | Whitepaper for the language          |
 
 ## Getting Started
 
