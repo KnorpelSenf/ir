@@ -1,11 +1,11 @@
 # Single Assignment and Ownership
 by **Marco Nikander**
 
-A concept for a memory-safe intermediate representation is presented. It combines **static single-assignment form** and the **single-ownership principle** into one IR. It is intended for programming languages without a garbage collector. The validity of all references can be verified via static analysis. Key design decisions and the resulting properties of the IR are discussed. The IR emphasizes simplicity of the concepts and the analysis, at the expense of some expressive power. The pointer-graph is a directed acyclic graph, by construction. Certain programming constructs, such as doubly-linked lists, cannot expressed directly. The present formulation supports only integers, references, expressions, and control flow. Future work includes tuples, unions, arrays, function-pointers, and side-effects.
+A concept for a memory-safe intermediate representation is presented. It combines **static single-assignment form** and the **single-ownership principle** into one IR. It is intended for programming languages without a garbage collector. The validity of all references can be verified via static analysis. Key design decisions and the resulting properties of the IR are discussed. The IR emphasizes simplicity of the concepts and the analysis, at the expense of some expressive power. The pointer-graph is a directed acyclic graph, by construction. Certain programming constructs, such as doubly-linked lists, cannot be expressed directly. The present formulation supports only integers, references, expressions, and control flow. Future work includes tuples, unions, arrays, function-pointers, and side-effects.
 
 ## A Few Ideas
 
-[**Static single-assignment (SSA) form**](https://en.wikipedia.org/wiki/Static_single-assignment_form) is a form of of code where each variable is assigned-to only once.
+[**Static single-assignment (SSA) form**](https://en.wikipedia.org/wiki/Static_single-assignment_form) is a form of code where each variable is assigned-to only once.
 Languages which allow the mutation of values can be translated into SSA by _versioning_ variables.
 A variable `x`, whose value is changed several times in the original program, is replaced by `x_0`, `x_1`, `x_2`, ... in SSA form.
 SSA form makes dataflow clearly visible and is well-suited for many compiler optimizations.
@@ -13,13 +13,13 @@ Many production compilers use intermediate representations (such as LLVM IR) whi
 
 **Resource** is a general term used to refer to entities such as data in memory, file handles, network connections, or hardware devices such as a GPU.
 Resources typically have a state.
-Many resources require construction to aquire them, and destruction to dispose of them.
+Many resources require construction to acquire them, and destruction to dispose of them.
 Some examples are:
 - memory which must be allocated and freed
 - a file handle which must be opened and closed
-- a network socket which must be openend and closed
+- a network socket which must be opened and closed
 
-[**Resource acquisition is initialization (RAII)**](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) is a programming technique where a constructor is used to aquire a resource and a destructor is used to release that resource.
+[**Resource acquisition is initialization (RAII)**](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) is a programming technique where a constructor is used to acquire a resource and a destructor is used to release that resource.
 This ties a resource to the lifetime of one or more objects.
 Smart pointers are a typical example of this technique.
 
@@ -40,22 +40,22 @@ To model ownership, moving, dropping, and also references, a richer set of primi
 
 ## A Language and a Machine
 
-The workings of single assignment and ownership can be explained using a small integer-only language and a machine runs it. 
+The workings of single assignment and ownership can be explained using a small integer-only language and a machine which runs it.
 **When our fictional machine is running, it calls functions, computes values, creates and destroys variables, jumps from block to block, and returns from functions.**
 How exactly these variables are stored, on the heap, in the stack frame, in registers, or inlined in the source code, is _not relevant_ for our abstract machine.
 What _is_ relevant for our machine is ownership, references, and the availability of variables.
 
 Our language is structured as follows:
-- A program in an list of functions.
-- A function is an list of blocks.
-- A block is an list of instructions.
+- A program is a list of functions.
+- A function is a list of blocks.
+- A block is a list of instructions.
 - The instructions within a block can `define` or `drop` variables.
 - The _last_ instruction of every block is a terminator (`goto`, `branch`, `return`), which does control flow.
 - A `define` has a value-producing operation on the right hand side.
 - An operation takes operands.
 - An operand is either a `constant` value, a `peek` (read) of an existing variable, or a `move` of an existing variable.
 - Operations include an identity function, function calls, referencing and dereferencing, as well as unary and binary operations.
-- The naming convention for functions, blocks, and variables is similar to [Multi-Level Intermediate Representation (MLIR)](https://en.wikipedia.org/wiki/MLIR_(software)) in the LLVM project..
+- The naming convention for functions, blocks, and variables is similar to [Multi-Level Intermediate Representation (MLIR)](https://en.wikipedia.org/wiki/MLIR_(software)) in the LLVM project.
 - Functions can take parameters.
 - Blocks can take parameters. This is equivalent to Phi-nodes from classical SSA. [Block parameters](https://mlir.llvm.org/docs/LangRef/#blocks) are taken from MLIR.
 - The language supports integers and references. Note that a type-checker must forbid the casting of references to integers and must forbid "pointer arithmetic" on references, so that these programs are memory-safe.
@@ -118,7 +118,7 @@ To ensure that programs are valid and memory-safe, several kinds of programming 
 - `drop` before `drop`
 
 These kinds of errors are well known under terms such as 'use after free' or 'double free'.
-Static analysis of the program can detect the these errors.
+Static analysis of the program can detect these errors.
 To do this, each variable has a state at each point in the program.
 The following diagram illustrates the **lifecycle** which a variable goes through, as the program executes.
 It shows how instructions with `define`, `peek`, `move`, or `drop` change the state of a variable.
@@ -208,8 +208,8 @@ We can imagine the front legs to be the beginning, i.e. the `define`, of a varia
 The hind legs symbolize the end, i.e. the `drop`, of that variable/reference, at a later point in the source code.
 To ensure the whole tower of references doesn't fall over (no dangling references -- no dangling feet), a reference must `drop` before (or at the same time) as the layer below it.
 This can be ensured by **treating the `drop` of a reference, as a `peek` at member of its points-to set**.
-Thus, every reference stands on the back of its points-to set, and it's Availability is checked both on the creation and destruction of the reference.
-Informally, this technique could be refered as the "piggyback trick" for references.
+Thus, every reference stands on the back of its points-to set, and its Availability is checked both on the creation and destruction of the reference.
+Informally, this technique could be referred to as the "piggyback trick" for references.
 Since function calls can transfer variables, it's insufficient to check the points-to set at just the `define` and `drop` of the reference.
 Conservatively, every variable in the points-to set of a reference `ref` must be Available when:
 
@@ -297,7 +297,7 @@ func positive_deref(int* ref) int {
 
 Alternatively, instead of being empty, the points-to set of `ref` could consist of a single 'anonymous variable' which is treated as always Available.
 
-> _**Open Questions**: Is is sound, to define the points-to set of a reference-type function parameter, as empty? Or must it be modeled as containing an abstract 'anonymous' variable which lies outside the scope of the function and is Available for the duration of the function? What if an aggregate type or nested pointers are passed into the function, and those are destructured? How can/must the points-to sets of the components be modelled then?_
+> _**Open Questions**: Is it sound, to define the points-to set of a reference-type function parameter, as empty? Or must it be modeled as containing an abstract 'anonymous' variable which lies outside the scope of the function and is Available for the duration of the function? What if an aggregate type or nested pointers are passed into the function, and those are destructured? How can/must the points-to sets of the components be modelled then?_
 
 The decision that a reference points to a variable, and not its memory address, which means that a reference becomes invalid when the variable is moved, is crucial for this property.
 This is one of several important enablers for analyzing each function individually, without having to resort to program-wide analysis.
@@ -324,7 +324,7 @@ This is an error because when arguments are passed to a function or a block, the
 The reference `r` points at `x`, but `x` is being moved, which invalidates `r`.
 There can be no reference to a variable which is Dropped.
 The actual implementation of the analysis must account for these _simultaneous_ semantics, but that is beyond the scope of this concept paper.
-Pratically speaking: if a function _needs_ the original variable _and_ a reference to it, `move` the variable into the function and create a `reference` to the variable once it is inside the function.
+Practically speaking: if a function _needs_ the original variable _and_ a reference to it, `move` the variable into the function and create a `reference` to the variable once it is inside the function.
 
 ### Returning from a Function
 
@@ -358,7 +358,7 @@ func foo() () {
                  //        ... because 'return' moves x
 }
 ```
-This analogous to calling a function and trying to move a variable and a reference to it.
+This is analogous to calling a function and trying to move a variable and a reference to it.
 It's also an error.
 
 This implies that a function can only return a reference, if it refers to a variable which lies outside of the function.
@@ -409,7 +409,7 @@ The IR won't promote a variable to the heap though.
 So how can static analysis detect that `return y` is unsafe?
 One possibility is to introduce lifetime annotations.
 This is exactly the reason why Rust has lifetime annotations.
-Another possiblility is to estimate the lifetime conservatively.
+Another possibility is to estimate the lifetime conservatively.
 
 Without looking at the implementation of `reference_compare`, only the function signature, the following can be deduced:
 - it takes two references 
@@ -435,7 +435,7 @@ Such an annotation is simpler than mandating full lifetime annotations on all ar
 This is the main limitation of an approach which does not use lifetime annotations.
 
 ## Future Work
-The list of future work is enormous, on both the conceptual and implementation level.
+The list of future work is enormous, on both the conceptual and implementation levels.
 Essential features which are absent from this concept:
 
 - tuples
@@ -452,7 +452,7 @@ Essential features which are absent from this concept:
 This concept outlines an intermediate representation for memory safety, based on several ideas.
 
 - static single assignment form, i.e. immutable data
-- single ownership and resource aquisition is initialization (RAII)
+- single ownership and resource acquisition is initialization (RAII)
 - non-owning references, i.e. no `move` / `drop` of the underlying variable via a reference
 - reference semantics tied to a variable, not the memory location
 - references are required to be valid while they are Available (as opposed to live, as in Rust)
@@ -472,7 +472,7 @@ If in-depth investigation demonstrates that the proposed model is sound, it coul
 | :----- | :------ | :------ |
 | Lively linear Lisp: "look ma, no garbage!"    | Henry Baker, 1992 | Demonstrates Lisp with linear types, and a heap allocator which works a bit like a free-list. One of the inspirations behind this IR. |
 | Rust: ['Polonius' borrow-checker](https://rust-lang.github.io/polonius/what_is_polonius.html) | ? | An explanation of Rust's state-of-the-art 'Polonius' borrow-checker. In development for seven years before being shipped in August 2026. One of the inspirations behind this IR. |
-| [Single Ownership and Memory Safety without Borrow Checking, Reference Counting, or Garbage Collection](https://verdagon.dev/blog/single-ownership-without-borrow-checking-rc-gc) | Ovadia, 2023 | An very interesting blogpost with several similar ideas, from the creator of the 'Valen' language. |
+| [Single Ownership and Memory Safety without Borrow Checking, Reference Counting, or Garbage Collection](https://verdagon.dev/blog/single-ownership-without-borrow-checking-rc-gc) | Ovadia, 2023 | An interesting blogpost with several similar ideas, from the creator of the 'Valen' language. |
 | Static Program Analysis                       | Møller, 2012  | Good source for dataflow analysis, pointer analysis, and basics of static analysis. |
 | SSA is Functional Programming                 | Appel, 1998   | Excellent simple introduction to SSA form and its parallels to functional programming. |
 | Efficiently Computing Static Single Assignment Form and the Control Dependence Graph | Cytron, 1991 | Foundational paper on SSA and how it can be computed. |
