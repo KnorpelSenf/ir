@@ -1,7 +1,17 @@
 # Single Assignment and Ownership
 by **Marco Nikander**
 
-A concept for a memory-safe intermediate representation is presented. It combines **static single-assignment form** and the **single-ownership principle** into one IR. It is intended for programming languages without a garbage collector. The validity of all references can be verified via static analysis. Key design decisions and the resulting properties of the IR are discussed. The IR emphasizes simplicity of the concepts and the analysis, at the expense of some expressiveness. The pointer-graph is a directed acyclic graph, by construction. Certain programming constructs, such as doubly-linked lists, cannot be expressed directly. The present formulation supports only integers, references, expressions, and control flow. Future work includes tuples, unions, arrays, function-pointers, and side-effects.
+A concept for a memory-safe intermediate representation is presented.
+It combines **static single-assignment form** and the **single-ownership principle** into one IR.
+If a given program can be compiled into this IR, then the validity of all references can be analyzed statically via borrow checking.
+This IR guarantees memory-safety without needing a garbage collector.
+It is intended for domains which have these requirements.
+Key design decisions and the resulting properties of the IR are discussed.
+The IR emphasizes simplicity of the concepts and the analysis, at the expense of some expressiveness.
+The pointer-graph is a directed acyclic graph, by construction.
+Certain programming constructs, such as doubly-linked lists, cannot be expressed directly.
+The present formulation supports only integers, references, expressions, and control flow.
+Future work includes tuples, unions, arrays, function-pointers, and side-effects.
 
 ## A Few Ideas
 
