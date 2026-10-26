@@ -208,8 +208,8 @@ We can imagine the front legs to be the beginning, i.e. the `define`, of a varia
 The hind legs symbolize the end, i.e. the `drop`, of that variable/reference, at a later point in the source code.
 To ensure the whole tower of references doesn't fall over (no dangling references -- no dangling feet), a reference must `drop` before (or at the same time) as the layer below it.
 This can be ensured by **treating the `drop` of a reference, as a `peek` at member of its points-to set**.
-Thus, every reference stands on the back of its points-to set, and its Availability is checked both on the creation and destruction of the reference.
-Informally, this technique could be referred to as the "piggyback trick" for references.
+Thus, every reference stands its points-to set, and the set's Availability is checked both on the creation and destruction of the reference.
+Informally, this technique could be referred to as the "piggyback trick".
 Since function calls can transfer variables, it's insufficient to check the points-to set at just the `define` and `drop` of the reference.
 Conservatively, every variable in the points-to set of a reference `ref` must be Available when:
 
