@@ -295,6 +295,10 @@ func positive_deref(int* ref) int {
 }
 ```
 
+Alternatively, instead of being empty, the points-to set of `ref` could consist of a single 'anonymous variable' which is treated as always Available.
+
+> _**Open Questions**: Is is sound, to define the points-to set of a reference-type function parameter, as empty? Or must it be modeled as containing an abstract 'anonymous' variable which lies outside the scope of the function and is Available for the duration of the function? What if an aggregate type or nested pointers are passed into the function, and those are destructured? How can/must the points-to sets of the components be modelled then?_
+
 The decision that a reference points to a variable, and not its memory address, which means that a reference becomes invalid when the variable is moved, is crucial for this property.
 This is one of several important enablers for analyzing each function individually, without having to resort to program-wide analysis.
 
