@@ -148,7 +148,7 @@ Therefore `define` is allowed, regardless of whether the variable state is curre
 
 Control flow, such as an if-else block, introduces another challenge: the state of a variable may become ambiguous.
 That is beyond the scope of this document, but will be discussed in detail in the analysis concept paper.
-More information of control flow joins in SSA, specifically phi-nodes and block parameters can be found in the [primer on static single-assignment form](./static_single_assignment.md).
+More information of control flow joins in SSA, specifically phi-nodes and block parameters can be found in the [primer on static single-assignment form](./intro_to_ssa_form.md).
 
 
 ## A Thinly Veiled Reference
