@@ -50,7 +50,7 @@ Our language is structured as follows:
 - A function is a list of blocks.
 - A block is a list of instructions.
 - The instructions within a block can `define` or `drop` variables.
-- The _last_ instruction of every block is a terminator (`goto`, `branch`, `return`), which does control flow.
+- The _last_ instruction of every block is control-flow instruction (`goto`, `branch`, `return`).
 - A `define` has a value-producing operation on the right hand side.
 - An operation takes operands.
 - An operand is either a `constant` value, a `peek` (read) of an existing variable, or a `move` of an existing variable.
@@ -207,7 +207,7 @@ _The town musicians of Bremen, from a fairytale. When the animals are performing
 We can imagine the front legs to be the beginning, i.e. the `define`, of a variable/reference.
 The hind legs symbolize the end, i.e. the `drop`, of that variable/reference, at a later point in the source code.
 To ensure the whole tower of references doesn't fall over (no dangling references -- no dangling feet), a reference must `drop` before (or at the same time) as the layer below it.
-This can be ensured by **treating the `drop` of a reference, as a `peek` at member of its points-to set**.
+This can be ensured by **treating the `drop` of a reference, as a `peek` at every member of its points-to set**.
 Thus, every reference stands its points-to set, and the set's Availability is checked both on the creation and destruction of the reference.
 Informally, this technique could be referred to as the "piggyback trick".
 Since function calls can transfer variables, it's insufficient to check the points-to set at just the `define` and `drop` of the reference.
