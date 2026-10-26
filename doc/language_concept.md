@@ -449,24 +449,22 @@ Essential features which are absent from this concept:
 
 ## Conclusion
 
-This concept outlines a memory-safe intermediate representation based on several ideas:
-- static single assignment form => immutable data
-- single ownership
-- non-owning references => no `move` / `drop` of the underlying variable via a reference
-- reference semantics tied to a variable, not the memory location
-- analysis enforces that references are valid as long as they are Available
-- references are immutable like all other variables => points-to graph is a DAG
-<!-- - resource aquisition is initialization (RAII) -->
+This concept outlines an intermediate representation for memory safety, based on several ideas.
 
-The goal is to create a simple and memory-safe IR.
-There is a lot of future work, and it is still uncertain if the proposed concept is formally sound.
-Formal investigation, as well as prototyping with very heavy testing is needed to explore the correctness of this approach in depth.
+- static single assignment form, i.e. immutable data
+- single ownership and resource aquisition is initialization (RAII)
+- non-owning references, i.e. no `move` / `drop` of the underlying variable via a reference
+- reference semantics tied to a variable, not the memory location
+- references are required to be valid while they are Available (as opposed to live, as in Rust)
+- references are immutable like all other variables (which implies that the points-to graph is a DAG)
+
+There is a great deal of future work, and it is uncertain if the proposed concept is sound with regard to memory-safety.
+Formal investigation as well as prototyping with very heavy testing, is needed to explore the correctness and practicality of this approach.
 The proposed IR makes several tradeoffs in expressiveness.
 Notably a doubly-linked list cannot be directly constructed using references.
 The IR features all control-flow mechanisms needed for structured programming.
 Once fundamental data-structures such as tuples and arrays are added, which must also be memory-safe, the IR becomes Turing-complete.
-
-If in-depth investigation demonstrates that the proposed model is sound, it can serve as the basis for a memory-safe programming language without 
+If in-depth investigation demonstrates that the proposed model is sound, it could serve as the basis for a memory-safe programming language.
 
 # Further Reading
 
