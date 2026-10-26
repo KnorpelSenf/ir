@@ -1,4 +1,4 @@
-# Static Single-Assignment Form
+# Introduction to Static Single-Assignment Form
 by **Marco Nikander**
 
 In
@@ -53,7 +53,7 @@ such as `call f(42, true)`.
 
 ## Control Flow
 
-**Control flow statements** allows us to perform conditional and looping
+**Control flow statements** allow us to perform conditional and looping
 computations. It lets us build a flow-chart in our programs. It is needed for
 programming constructs such as `if`, `for`, and `while`. Control flow also
 allows us to `return` from a function. A control flow statement is always the
@@ -137,7 +137,7 @@ loop:
 Control flow, such as an if-statement or a loop, can be tricky to translate into
 SSA form. This is especially true if the control flow has split into two or more
 paths, using `branch`, and then rejoins again afterwards. For example, when we
-have a if-else blocks and have code which runs afterwards:
+have if-else blocks and have code which runs afterwards:
 
 Take this example:
 
@@ -233,7 +233,7 @@ variable(s) we need to pass into which block(s). In large programs, this can be
 more complicated.
 
 There are special algorithms, which rely on a concept called
-[dominance](https://en.wikipedia.org/wiki/Dominator_(graph_theory) to compute
+[dominance](https://en.wikipedia.org/wiki/Dominator_(graph_theory)) to compute
 which variables must be passed where. Many of the relevant papers are as old as
 SSA-form, and thus explain it in terms of phi nodes. Since phi nodes and block
 parameters are equivalent, the same theory and same algorithms apply, even if
@@ -243,7 +243,7 @@ the notation of what is written where, is different.
 
 The nice thing about SSA-form is that it makes many compiler optimizations quite
 easy to do, because each variable only ever has one value in the program. We
-don't have to check if the value changed inbetween. Let us recall a code snippet
+don't have to check if the value changed in between. Let us recall a code snippet
 from above:
 
 ```c

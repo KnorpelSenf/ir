@@ -1,11 +1,12 @@
 # Intermediate Representation
 
-An interpreter for a memory-safe intermediate representation (IR). This IR is
-inspired by WebAssembly, LLVM IR, MLIR, and Rust MIR. It combines static
-single-assignment form, the single ownership principle, and integrates
-references directly into static single-assignment (SSA) form. The
-[**language concept paper**](doc/language_concept.md) explains the ideas behind
-the IR and its approach to memory-safety. A
+This is an intermediate representation (IR) designed for memory-safety in
+programming languages without a garbage collector. It is inspired by
+WebAssembly, LLVM IR, MLIR, and Rust MIR. It combines static single-assignment
+form and the single ownership principle. This IR integrates references directly
+into static single-assignment (SSA) form. The
+[**language whitepaper**](doc/language_concept.md) explains the ideas behind the
+IR and its approach to memory-safety. A
 [primer on SSA](doc/intro_to_ssa_form.md) form is also available.
 
 The IR sits between high-level languages such as C or TypeScript on one end, and
